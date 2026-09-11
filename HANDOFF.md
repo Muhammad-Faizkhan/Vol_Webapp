@@ -490,6 +490,27 @@ The user reported that switching to the business flow still showed sidebar nav i
 
 **Fixed**: split into `individualNavItems` and `businessNavItems` arrays, selected via `persona === "business" ? businessNavItems : individualNavItems`. Verified via Playwright (reading each `nav a` label at both persona states) that the rendered labels now exactly match Figma for both: business → `["Home","Workspaces","Products","Classrooms","Profile"]`, individual → `["Home","Feed","Workspaces","Explore","Classrooms","Products","Profile"]`. `npm run lint` and `npm run build` both clean.
 
+## Follow-up: Business Registration's avatar-upload section was a row instead of a centered column, causing an overflow/overlap bug
+
+The user shared two screenshots of the live Business Registration form. Comparing against Figma node `514:10863`'s metadata and a direct screenshot of its photo-upload area (node `514:11243`) revealed the "Upload Image" avatar section should be a **centered column** — dashed avatar square, then the "Upload Image" button centered directly below it — not a left-avatar/right-button row (which is how `IndividualProfileForm`'s Profile Photo section is correctly built, since that one's Figma frame really is a row with a "Profile Photo" label). The business form's structure was copy-pasted from the individual form's row layout without checking that business's own Figma frame is different (no label, stacked column instead).
+
+**Fixed**: changed the avatar+button wrapper from `flex-wrap items-center` (row) to `flex-col items-center` (column) and enlarged the avatar box slightly to read correctly as a stacked profile-photo picker.
+
+**Also found and fixed a real regression while verifying**: this column change exposed a pre-existing bug from the earlier spacing-compression pass — the cover-image dropzone `<button>` and the Business Verification upload `<button>` both had a **fixed** `h-[clamp(...)]` height that was smaller than their actual stacked content (icon + 2 lines of text + a pill button), so the content silently overflowed the box's bottom edge. This had gone unnoticed as visual "extra padding" before, but became a highly visible overlap once the avatar section directly below it became a tighter centered column. Fixed by changing both to `min-h-[clamp(...)]` (grows to fit content) with proper internal padding instead of a hard-clipped fixed height — the correct fix per this project's "always fix the root cause, not the symptom" convention, not just re-adding spacing to visually separate them.
+
+**Verified**: `npm run lint` and `npm run build` clean, 0px horizontal overflow, light and dark mode screenshots confirm no more overlap and the column layout now matches Figma's photo-upload structure.
+
+## Follow-up: app content stretched edge-to-edge on screens wider than Figma's 1920px canvas, shrinking the sidebar's proportion
+
+The user reported the sidebar "not taking so much space as compared to Figma." Figma's canvas is a fixed 1920px design where the sidebar is 400/1920 ≈ 20.9% of the width — and at a 1920px (or narrower) viewport, this app already matched that ratio exactly. The bug only appears on screens **wider** than 1920px (e.g. a 2560px monitor): `Sidebar` and `AppHeader` are both `position: fixed` pinned to the true viewport edges, and `main` in `src/app/(app)/layout.tsx` had `lg:ml-[400px]` with no corresponding right-side constraint — so on a wider screen, `main` simply stretched to fill all the extra width while the sidebar stayed a fixed 400px, shrinking its visual proportion well below Figma's 20.9% (e.g. down to ~15.6% at 2560px, ~11.6% at 3440px ultrawide).
+
+**Fixed** by centering the whole fixed-position composition once the viewport exceeds 1920px, using `max(fixed-value, calc((100vw - 1920px)/2 + fixed-value))`-style arbitrary values — this resolves to the exact original fixed-pixel value for any viewport ≤1920px (zero behavior change, verified unchanged at 1366px and 1920px), and beyond 1920px it shifts the sidebar's left edge, the header's left/right edges, and `main`'s left/right margins inward symmetrically, so the design keeps its correct Figma proportions and gutters grow evenly on both sides instead of content stretching unboundedly on one side only:
+- `Sidebar.tsx`: `lg:left-[max(0px,calc((100vw-1920px)/2))]`
+- `AppHeader.tsx`: `lg:left-[max(400px,calc((100vw-1920px)/2+400px))] lg:right-[max(0px,calc((100vw-1920px)/2))]`
+- `(app)/layout.tsx`'s `main`: `lg:ml-[max(400px,calc((100vw-1920px)/2+400px))] lg:mr-[max(0px,calc((100vw-1920px)/2))]`
+
+**Verified** via Playwright measuring the sidebar's actual rendered width/ratio at 1366px (400px, ratio 0.293 — unchanged), 1920px (400px, ratio 0.208 — unchanged, matches Figma), 2560px (sidebar now offset to start at x=320 instead of x=0, main/header symmetric right gutter of 320px, ratio restored toward Figma's proportion), and 3440px ultrawide (same symmetric-centering behavior). 0px horizontal overflow confirmed at 2560px. `npm run lint` and `npm run build` both clean.
+
 ## How to resume in a new session
 
 1. Open this repo in Claude Code, confirm Figma MCP access (`whoami` should return the same account).

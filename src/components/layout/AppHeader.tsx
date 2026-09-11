@@ -14,7 +14,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const { toggleTheme } = useTheme();
 
   return (
-    <header className="fixed inset-x-0 top-0 z-20 flex h-20 items-center justify-between gap-3 border-b border-light-border bg-app-bg px-4 dark:border-dak-border dark:bg-dak-bg sm:px-6 lg:left-[400px] lg:h-[100px] lg:px-10">
+    <header className="fixed inset-x-0 top-0 z-20 flex h-20 items-center justify-between gap-3 border-b border-light-border bg-app-bg px-4 dark:border-dak-border dark:bg-dak-bg sm:px-6 lg:left-[max(400px,calc((100vw-1920px)/2+400px))] lg:right-[max(0px,calc((100vw-1920px)/2))] lg:h-[100px] lg:px-10">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         <button
           type="button"

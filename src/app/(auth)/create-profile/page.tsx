@@ -224,7 +224,7 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
         >
           <button
             type="button"
-            className="flex h-[clamp(56px,5.5dvh,80px)] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#c6c6cd] bg-[#f5f5f5] dark:border-dak-border dark:bg-[#2b2b31]"
+            className="flex min-h-[clamp(56px,5.5dvh,80px)] w-full flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#c6c6cd] bg-[#f5f5f5] py-3 dark:border-dak-border dark:bg-[#2b2b31]"
           >
             <Image src="/icons/upload-cloud.svg" alt="" width={24} height={30} className="invert dark:invert-0" />
             <span className="text-sm text-[#2b2b31] dark:text-dak-body">or drag and drop</span>
@@ -234,8 +234,8 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
             </span>
           </button>
 
-          <div className="flex w-full flex-wrap items-center gap-3 border-b border-[rgba(148,54,251,0.6)] pb-[clamp(0.375rem,0.7dvh,0.625rem)] dark:border-dak-border">
-            <div className="flex size-[clamp(36px,3.5dvh,52px)] items-center justify-center rounded-xl border border-dashed border-[#9436fb] bg-[#020204] dark:border-dak-border dark:bg-transparent">
+          <div className="flex w-full flex-col items-center gap-3 border-b border-[rgba(148,54,251,0.6)] pb-[clamp(0.375rem,0.7dvh,0.625rem)] dark:border-dak-border">
+            <div className="flex size-[clamp(48px,4.5dvh,72px)] items-center justify-center rounded-xl border border-dashed border-[#9436fb] bg-[#020204] dark:border-dak-border dark:bg-transparent">
               <Image src="/icons/user-rounded-small.svg" alt="" width={36} height={36} />
             </div>
             <button
@@ -362,7 +362,7 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
             </p>
             <button
               type="button"
-              className="flex h-[clamp(48px,4.5dvh,64px)] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#c6c6cd] bg-[#f5f5f5] dark:border-dak-border dark:bg-[#2b2b31]"
+              className="flex min-h-[clamp(48px,4.5dvh,64px)] w-full flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#c6c6cd] bg-[#f5f5f5] py-3 dark:border-dak-border dark:bg-[#2b2b31]"
             >
               <Image src="/icons/upload-cloud.svg" alt="" width={24} height={30} className="invert dark:invert-0" />
               <span className="flex items-center gap-1 text-sm text-[#2b2b31] dark:text-dak-body">
