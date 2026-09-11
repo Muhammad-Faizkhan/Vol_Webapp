@@ -482,6 +482,14 @@ React guarantees the first client render uses `getPersonaServerSnapshot()` (matc
 
 **Verified**: `npm run lint` and `npm run build` both clean. Playwright: loaded `/home` and `/business/home` fresh (no console errors), then specifically reproduced the original bug scenario — set `localStorage.vol-persona = "business"` and reloaded `/business/home` — confirmed zero console errors and the sidebar's Home link correctly resolves to `/business/home` with no hydration warning.
 
+## Follow-up: business persona's sidebar had the individual persona's full nav list instead of its own shorter one
+
+The user reported that switching to the business flow still showed sidebar nav items that didn't match Figma, and that the item *count* differed from the individual role. Confirmed via `get_screenshot` on two business-persona nodes (`562:31634` Business Home and `562:32050` Products/dashboard, both consistent): the business sidebar has only **5** nav items — Home, Workspaces, Products, Classrooms, Profile — dropping Feed and Explore entirely, and with Products/Classrooms in **swapped order** relative to the individual sidebar (individual: Home, Feed, Workspaces, Explore, Classrooms, Products, Profile — 7 items).
+
+**Root cause**: `Sidebar.tsx` only ever varied the *Home link's href* by persona; every other nav item came from one hardcoded 7-item array shared by both personas, so a business session saw Feed and Explore links that don't exist in Figma's business design at all.
+
+**Fixed**: split into `individualNavItems` and `businessNavItems` arrays, selected via `persona === "business" ? businessNavItems : individualNavItems`. Verified via Playwright (reading each `nav a` label at both persona states) that the rendered labels now exactly match Figma for both: business → `["Home","Workspaces","Products","Classrooms","Profile"]`, individual → `["Home","Feed","Workspaces","Explore","Classrooms","Products","Profile"]`. `npm run lint` and `npm run build` both clean.
+
 ## How to resume in a new session
 
 1. Open this repo in Claude Code, confirm Figma MCP access (`whoami` should return the same account).

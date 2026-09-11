@@ -38,8 +38,8 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const persona = useSyncExternalStore(subscribeToPersona, getPersonaSnapshot, getPersonaServerSnapshot);
 
-  const navItems = [
-    { href: persona === "business" ? "/business/home" : "/home", label: "Home", icon: "home" },
+  const individualNavItems = [
+    { href: "/home", label: "Home", icon: "home" },
     { href: "/discover", label: "Feed", icon: "feed" },
     { href: "/workspaces", label: "Workspaces", icon: "workspaces" },
     { href: "/explore", label: "Explore", icon: "explore" },
@@ -47,6 +47,19 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
     { href: "/business/dashboard", label: "Products", icon: "products" },
     { href: "/profile", label: "Profile", icon: "profile" },
   ];
+
+  // The business persona's sidebar has fewer items than the individual one — no Feed or
+  // Explore — and Products/Classrooms are in swapped order, per Figma nodes 562:31634 and
+  // 562:32050 (both business-persona screens, confirmed consistent across both).
+  const businessNavItems = [
+    { href: "/business/home", label: "Home", icon: "home" },
+    { href: "/workspaces", label: "Workspaces", icon: "workspaces" },
+    { href: "/business/dashboard", label: "Products", icon: "products" },
+    { href: "/classrooms", label: "Classrooms", icon: "classrooms" },
+    { href: "/profile", label: "Profile", icon: "profile" },
+  ];
+
+  const navItems = persona === "business" ? businessNavItems : individualNavItems;
 
   return (
     <>
