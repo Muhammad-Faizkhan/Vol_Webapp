@@ -511,6 +511,21 @@ The user reported the sidebar "not taking so much space as compared to Figma." F
 
 **Verified** via Playwright measuring the sidebar's actual rendered width/ratio at 1366px (400px, ratio 0.293 — unchanged), 1920px (400px, ratio 0.208 — unchanged, matches Figma), 2560px (sidebar now offset to start at x=320 instead of x=0, main/header symmetric right gutter of 320px, ratio restored toward Figma's proportion), and 3440px ultrawide (same symmetric-centering behavior). 0px horizontal overflow confirmed at 2560px. `npm run lint` and `npm run build` both clean.
 
+## Follow-up: the ultra-wide sidebar fix above was incomplete — the sidebar was still disproportionately wide on ordinary laptop screens below 1920px
+
+The user reported the sidebar still didn't match Figma's proportion after the previous fix. That fix only handled viewports **above** 1920px (correctly), but left the sidebar at a rigid fixed `400px` for every viewport from `lg` (1024px) up to 1920px — and most real laptop screens (1366×768, 1440×900, 1536×864 are among the most common desktop resolutions) fall well inside that range. At 1366px, a fixed 400px sidebar is 400/1366 ≈ 29.3% of the screen — **41% wider, proportionally, than Figma's 400/1920 ≈ 20.8%** — which is what the user was actually seeing, not the ultra-wide case.
+
+**Fixed properly this time** by making the sidebar width itself scale with the viewport instead of being a fixed pixel value at any point below 1920px. Added two shared CSS custom properties in `globals.css`'s `:root` so the math lives in one place instead of being repeated (and potentially drifting) across three components:
+```css
+--app-sidebar-w: clamp(240px, 20.8333vw, 400px);
+--app-wide-gutter: max(0px, calc((100vw - 1920px) / 2));
+```
+`--app-sidebar-w` scales proportionally with the viewport (20.8333vw = 400/1920 as a percentage) between a 240px usability floor (so nav labels/icons stay legible on narrower `lg` screens near 1024px) and Figma's exact 400px value, which it reaches and caps at exactly 1920px. `--app-wide-gutter` is the same centering offset as before, now expressed once instead of duplicated. `Sidebar.tsx`, `AppHeader.tsx`, and `(app)/layout.tsx`'s `main` now reference these vars instead of hardcoded `400px`/duplicated `calc()` expressions (e.g. `lg:w-[var(--app-sidebar-w)]`, `lg:ml-[calc(var(--app-sidebar-w)+var(--app-wide-gutter))]`).
+
+**Verified** via Playwright measuring the sidebar's actual rendered width/ratio across seven viewports: 1024px → 240px (floored, ratio 0.234), 1280/1366/1440/1536/1920px → all land almost exactly on Figma's 0.208 ratio (e.g. 1366px → 284.6px sidebar, ratio 0.208 — down from the previous 400px/0.293), and 2560px → still correctly capped at 400px with the composition centered (from the prior follow-up, unaffected by this change). Screenshot at 1366px confirms nav items/icons/text still render cleanly at the smaller proportional width. `npm run lint` and `npm run build` both clean, 0px horizontal overflow confirmed at 1366px.
+
+**Lesson for future viewport-fluid work in this codebase**: when Figma's design is a fixed reference canvas (1920px here) and a fixed-pixel measurement is ported directly to a `lg:` (or any single-breakpoint) Tailwind class, it only stays correct exactly at that one reference viewport — every other viewport inside that breakpoint's range silently drifts from Figma's actual proportion. Fixed sidebar/header/rail widths measured off Figma should generally be expressed as `clamp(floor, Xvw, Figma-px-value)` (where `X = Figma-px-value / 19.2` to convert to a vw percentage of the 1920px canvas), not `lg:w-[Figma-px-value]`, unless there's a specific reason the element should NOT scale between breakpoints.
+
 ## How to resume in a new session
 
 1. Open this repo in Claude Code, confirm Figma MCP access (`whoami` should return the same account).

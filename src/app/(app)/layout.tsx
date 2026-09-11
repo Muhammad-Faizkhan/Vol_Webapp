@@ -11,7 +11,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     <div className="min-h-[100dvh] w-full bg-app-bg dark:bg-dak-bg">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <AppHeader onMenuClick={() => setSidebarOpen(true)} />
-      <main className="min-h-[calc(100dvh-80px)] px-4 pb-8 pt-24 sm:px-6 lg:ml-[max(400px,calc((100vw-1920px)/2+400px))] lg:mr-[max(0px,calc((100vw-1920px)/2))] lg:min-h-[calc(100dvh-100px)] lg:px-[50px] lg:pb-10 lg:pt-[clamp(112px,14dvh,140px)]">
+      <main className="min-h-[calc(100dvh-80px)] px-4 pb-8 pt-24 sm:px-6 lg:ml-[calc(var(--app-sidebar-w)+var(--app-wide-gutter))] lg:mr-[var(--app-wide-gutter)] lg:min-h-[calc(100dvh-100px)] lg:px-[50px] lg:pb-10 lg:pt-[clamp(112px,14dvh,140px)]">
         {children}
       </main>
     </div>

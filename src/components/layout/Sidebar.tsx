@@ -73,7 +73,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
       )}
 
       <div
-        className={`fixed inset-y-0 left-0 z-40 flex w-[280px] max-w-[85vw] shrink-0 flex-col bg-dak-cta transition-transform duration-200 ease-out dark:bg-dak-bg lg:left-[max(0px,calc((100vw-1920px)/2))] lg:w-[400px] lg:max-w-none lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[280px] max-w-[85vw] shrink-0 flex-col bg-dak-cta transition-transform duration-200 ease-out dark:bg-dak-bg lg:left-[var(--app-wide-gutter)] lg:w-[var(--app-sidebar-w)] lg:max-w-none lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >

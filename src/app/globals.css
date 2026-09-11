@@ -33,6 +33,15 @@
 
   --dash-bg: #fbfcff;
   --dash-header: #f8f8f8;
+
+  /* App-shell sidebar sizing: Figma's canvas is a fixed 1920px design where the sidebar is
+     exactly 400px (~20.8333% of width). Below 1920px the sidebar should scale down with the
+     viewport to keep that same proportion (a laptop screen narrower than 1920px must not get a
+     disproportionately wide fixed 400px sidebar); at and above 1920px it caps at the real 400px,
+     and --app-wide-gutter centers the whole fixed-position shell instead of letting main content
+     stretch unboundedly on ultra-wide monitors. See HANDOFF.md's sidebar-proportion follow-ups. */
+  --app-sidebar-w: clamp(240px, 20.8333vw, 400px);
+  --app-wide-gutter: max(0px, calc((100vw - 1920px) / 2));
 }
 
 @theme inline {
