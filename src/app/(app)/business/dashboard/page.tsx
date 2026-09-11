@@ -18,47 +18,48 @@ const products = Array.from({ length: 8 }).map((_, i) => ({
     ["Thickness", '1/8" (3mm)'],
     ["Rotation", "0"],
   ] as [string, string][],
+  imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
 }));
 
 export default function BusinessDashboardPage() {
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[32px] font-bold tracking-[-0.32px] text-auth-navy">
+          <h1 className="text-2xl font-bold tracking-[-0.32px] text-auth-navy dark:text-dak-heading sm:text-[32px]">
             Welcome back, Abc Business
           </h1>
-          <p className="text-base text-auth-slate">
+          <p className="text-base text-auth-slate dark:text-dak-body">
             MasterTile Inc. Here is your overview for today.
           </p>
         </div>
         <Link
           href="/business/products/add"
-          className="flex items-center gap-2 rounded-lg bg-auth-navy px-4 py-2.5 text-base font-medium text-white"
+          className="flex w-fit items-center gap-2 rounded-lg bg-dak-cta px-4 py-2.5 text-base font-medium text-white"
         >
           + Add Product
         </Link>
       </div>
 
-      <div className="flex gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="flex flex-1 flex-col items-center gap-4 rounded-lg border border-light-border bg-[#f8f9ff] px-[25px] py-[17px]"
+            className="flex flex-col items-center gap-4 rounded-lg border border-light-border bg-[#f8f9ff] px-[25px] py-[17px] dark:border-dak-cta dark:bg-dak-surface"
           >
-            <span className="text-sm font-medium tracking-[0.28px] text-auth-navy">
+            <span className="text-sm font-medium tracking-[0.28px] text-auth-navy dark:text-dak-heading">
               {stat.label}
             </span>
-            <p className="text-2xl font-medium text-auth-navy">
-              {stat.value} <span className="text-sm text-[#889298]">{stat.note}</span>
+            <p className="text-2xl font-medium text-auth-navy dark:text-dak-heading">
+              {stat.value} <span className="text-sm text-[#889298] dark:text-dak-muted">{stat.note}</span>
             </p>
           </div>
         ))}
       </div>
 
       <section className="flex flex-col gap-4">
-        <h3 className="text-2xl font-medium text-auth-navy">Your Product Catalog</h3>
-        <div className="flex flex-wrap gap-6">
+        <h3 className="text-2xl font-medium text-auth-navy dark:text-dak-heading">Your Product Catalog</h3>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6">
           {products.map((p, i) => (
             <ProductCard key={i} {...p} />
           ))}

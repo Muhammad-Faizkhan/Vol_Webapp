@@ -11,34 +11,34 @@ const products = [
 
 export default function CanvasEditorPage() {
   return (
-    <div className="flex h-screen w-full flex-col bg-white">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-light-border bg-white px-6">
-        <div className="flex items-center gap-3">
+    <div className="flex h-dvh w-full flex-col bg-white">
+      <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-light-border bg-white px-4 py-2 dark:border-dak-border dark:bg-dak-bg sm:flex-nowrap sm:px-6 sm:py-0">
+        <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/workspaces/1/canvases"
-            className="flex size-9 items-center justify-center rounded-lg bg-[#f2f2f3] text-auth-navy"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f2f2f3] text-auth-navy dark:bg-dak-cta dark:text-white"
           >
             <Image
               src="/icons/arrow-narrow-right.svg"
               alt=""
               width={18}
               height={18}
-              className="-scale-y-100 rotate-180"
+              className="-scale-y-100 rotate-180 dark:invert"
             />
           </Link>
-          <span className="text-base text-auth-navy">Lorem Ipsum Workspace</span>
-          <span className="text-base font-medium text-auth-navy">/ Abc Canvas</span>
+          <span className="hidden truncate text-base text-auth-navy dark:text-dak-heading sm:inline">Lorem Ipsum Workspace</span>
+          <span className="truncate text-base font-medium text-auth-navy dark:text-dak-heading">/ Abc Canvas</span>
         </div>
 
-        <div className="flex items-center gap-2 text-base font-medium text-auth-navy">
-          <div className="flex size-8 items-center justify-center rounded-full bg-auth-navy/15">
+        <div className="hidden items-center gap-2 text-base font-medium text-auth-navy dark:text-dak-body md:flex">
+          <div className="flex size-8 items-center justify-center rounded-full bg-auth-navy/15 dark:bg-dak-cta/20">
             <Image src="/icons/user-rounded-small.svg" alt="" width={16} height={16} />
           </div>
           Invited by Abc Business
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="rounded-lg bg-[#efefef] px-3 py-1.5 text-sm font-semibold text-auth-navy">
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="rounded-lg bg-[#efefef] px-3 py-1.5 text-sm font-semibold text-auth-navy dark:bg-dak-surface dark:text-dak-heading">
             Synced
           </span>
           <div className="flex items-center">
@@ -46,14 +46,14 @@ export default function CanvasEditorPage() {
               <div
                 key={i}
                 style={{ marginLeft: i === 0 ? 0 : -10 }}
-                className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-auth-navy/70"
+                className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-auth-navy/70 dark:border-dak-bg dark:bg-dak-cta/70"
               >
                 <Image src="/icons/user-rounded-small.svg" alt="" width={16} height={16} />
               </div>
             ))}
             <div
               style={{ marginLeft: -10 }}
-              className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-[#e0dfe0] text-xs font-semibold text-auth-navy"
+              className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-[#e0dfe0] text-xs font-semibold text-auth-navy dark:border-dak-bg dark:bg-dak-surface dark:text-dak-heading"
             >
               3+
             </div>
@@ -144,23 +144,23 @@ export default function CanvasEditorPage() {
           3 Collaboratives Live
         </div>
 
-        <aside className="absolute right-0 top-0 flex h-full w-[400px] flex-col gap-6 overflow-y-auto bg-[#d9d9d9] p-6">
+        <aside className="absolute right-0 top-0 flex h-full w-[400px] flex-col gap-6 overflow-y-auto bg-[#d9d9d9] p-6 dark:bg-dak-bg">
           <div>
-            <h3 className="mb-3 text-base font-semibold text-auth-navy">
+            <h3 className="mb-3 text-base font-semibold text-auth-navy dark:text-dak-heading">
               Selected Product
             </h3>
-            <div className="overflow-hidden rounded-lg border border-light-border bg-[#f8f9ff]">
-              <div className="flex h-[130px] items-center justify-center bg-auth-navy">
+            <div className="overflow-hidden rounded-lg border border-light-border bg-[#f8f9ff] dark:border-dak-border dark:bg-dak-surface">
+              <div className="flex h-[130px] items-center justify-center bg-auth-navy dark:bg-dak-surface">
                 <Image src="/illustrations/auth-placeholder.svg" alt="" width={40} height={40} />
               </div>
               <div className="p-4">
-                <p className="text-base font-semibold text-auth-navy">Lorem Ipsum Product</p>
-                <p className="text-sm text-[#929292]">By Abc Distributor</p>
+                <p className="text-base font-semibold text-auth-navy dark:text-dak-heading">Lorem Ipsum Product</p>
+                <p className="text-sm text-[#929292] dark:text-dak-muted">By Abc Distributor</p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-1 rounded-2xl bg-[#f8f9ff] p-4">
+          <div className="flex flex-col gap-1 rounded-2xl bg-[#f8f9ff] p-4 dark:bg-dak-surface">
             {[
               ["True Size", "600×1200 MM"],
               ["Thickness", "9 mm"],
@@ -169,34 +169,34 @@ export default function CanvasEditorPage() {
             ].map(([label, value], i) => (
               <div
                 key={label}
-                className={`flex justify-between py-2.5 text-sm text-auth-navy ${i !== 3 ? "border-b border-light-border" : ""}`}
+                className={`flex justify-between py-2.5 text-sm text-auth-navy dark:text-dak-body ${i !== 3 ? "border-b border-light-border dark:border-dak-border" : ""}`}
               >
                 <span>{label}</span>
-                <span className="font-medium">{value}</span>
+                <span className="font-medium dark:text-dak-heading">{value}</span>
               </div>
             ))}
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-light-border bg-white">
-            <div className="bg-[#cdced0] px-4 py-3 text-sm font-medium text-auth-navy">
+          <div className="overflow-hidden rounded-lg border border-light-border bg-white dark:border-dak-border dark:bg-dak-surface">
+            <div className="bg-[#cdced0] px-4 py-3 text-sm font-medium text-auth-navy dark:bg-dak-bg dark:text-dak-heading">
               Products on this canvas · 14
             </div>
             <div className="flex flex-col gap-4 p-4">
               {products.map((p, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between rounded-2xl border border-light-border bg-[#f8f9ff] px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border border-light-border bg-[#f8f9ff] px-4 py-3 dark:border-dak-border dark:bg-dak-bg"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex size-8 items-center justify-center rounded-sm bg-auth-navy">
+                    <div className="flex size-8 items-center justify-center rounded-sm bg-auth-navy dark:bg-dak-cta">
                       <Image src="/illustrations/auth-placeholder.svg" alt="" width={16} height={16} />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-auth-navy">{p.name}</span>
-                      <span className="text-xs text-[#929292]">{p.by}</span>
+                      <span className="text-sm font-medium text-auth-navy dark:text-dak-heading">{p.name}</span>
+                      <span className="text-xs text-[#929292] dark:text-dak-muted">{p.by}</span>
                     </div>
                   </div>
-                  <span className="text-sm text-auth-navy">{p.qty}</span>
+                  <span className="text-sm text-auth-navy dark:text-dak-body">{p.qty}</span>
                 </div>
               ))}
             </div>

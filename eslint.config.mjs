@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Isolated agent worktrees are separate checkouts with their own history/deps —
+    // never part of this project's own source.
+    ".claude/**",
   ]),
 ]);
 

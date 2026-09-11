@@ -12,13 +12,13 @@ const canvases = Array.from({ length: 8 }).map((_, i) => ({
 
 export default function WorkspaceCanvasesPage() {
   return (
-    <div className="flex gap-8">
-      <div className="flex flex-[2] flex-wrap gap-6">
+    <div className="flex flex-col gap-8 xl:flex-row">
+      <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6 xl:flex-[2]">
         {canvases.map((c, i) => (
           <WorkspaceCard key={i} variant="grid" {...c} />
         ))}
       </div>
-      <div className="flex flex-1 flex-col gap-6">
+      <div className="flex w-full flex-col gap-6 xl:w-[360px] xl:shrink-0">
         <MembersPanel />
         <ActivityPanel />
       </div>

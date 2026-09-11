@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ThemeToggleButton } from "@/components/theme/ThemeToggleButton";
 
 type AuthShellProps = {
   children: ReactNode;
@@ -16,49 +17,52 @@ export function AuthShell({
   contentWidth = 570,
 }: AuthShellProps) {
   return (
-    <div className="relative h-[1080px] w-[1920px] shrink-0 bg-white">
-      <div className="absolute right-0 top-0 h-[1080px] w-[1160px] bg-auth-bg2" />
-      <div className="absolute left-0 top-0 h-[1080px] w-[760px] bg-auth-navy" />
-
-      <div className="absolute left-[214px] top-[293.75px] h-[332px] w-[332px] overflow-hidden">
-        <Image
-          src="/illustrations/auth-placeholder.svg"
-          alt=""
-          width={332}
-          height={332}
-        />
+    <div className="relative flex h-[100dvh] w-full flex-col overflow-hidden bg-app-bg dark:bg-dak-bg lg:flex-row">
+      <div className="pointer-events-none absolute inset-0">
+        <Image src="/illustrations/light-swirl-bg.png" alt="" fill className="block object-cover dark:hidden" />
+        <Image src="/illustrations/dark-swirl-bg.svg" alt="" fill className="hidden object-cover dark:block" />
       </div>
-
-      <p className="absolute left-[99.1px] top-[671.25px] w-[561.8px] text-center text-base font-medium leading-[23px] text-white">
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industry&apos;s standard dummy text
-        ever since 1966, when designers at Letraset and James Mosley, the
-        librarian at St Bride Printing Library in London, took a 1914 Cicero
-        translation and scrambled it to make dummy text for Letraset&apos;s
-        Body Type sheets.
-      </p>
 
       {showBack && (
         <Link
           href={backHref}
-          className="absolute left-[810px] top-[60px] flex items-center gap-1.5 text-base font-medium text-auth-navy"
+          className="relative z-10 m-4 flex w-fit items-center gap-1.5 text-base font-medium text-[#020204] dark:text-dak-heading sm:m-6 lg:absolute lg:left-10 lg:top-[clamp(1rem,3dvh,2.5rem)] lg:m-0"
         >
           <Image
             src="/icons/arrow-narrow-right.svg"
             alt=""
             width={24}
             height={24}
-            className="-scale-y-100 rotate-180"
+            className="-scale-y-100 rotate-180 block dark:hidden"
+          />
+          <Image
+            src="/icons/arrow-narrow-right-light.svg"
+            alt=""
+            width={24}
+            height={24}
+            className="-scale-y-100 rotate-180 hidden dark:block"
           />
           Back
         </Link>
       )}
 
-      <div
-        className="absolute left-[1055px] top-[60px] max-h-[960px] overflow-y-auto overflow-x-hidden py-[60px]"
-        style={{ width: contentWidth }}
-      >
-        {children}
+      <ThemeToggleButton className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6 lg:right-10 lg:top-[clamp(1rem,3dvh,2.5rem)]" />
+
+      <div className="relative hidden shrink-0 items-center justify-center lg:flex lg:w-[42%]">
+        <div className="relative aspect-[773/918] h-[clamp(280px,62dvh,620px)] w-auto max-w-[480px]">
+          <Image
+            src="/illustrations/auth-hero.png"
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+      </div>
+
+      <div className="relative flex flex-1 flex-col items-center overflow-y-auto px-4 py-[clamp(0.75rem,4dvh,3.75rem)] sm:px-10 lg:px-[clamp(1.5rem,4vw,60px)]">
+        <div className="w-full lg:mx-auto" style={{ maxWidth: contentWidth }}>
+          {children}
+        </div>
       </div>
     </div>
   );

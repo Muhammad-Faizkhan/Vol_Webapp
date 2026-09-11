@@ -5,34 +5,41 @@ const toolbarIcons = ["cursor", "hand", "pen", "shapes", "text", "comment", "ima
 
 export default function CanvasFromPostPage() {
   return (
-    <div className="flex h-screen w-full flex-col bg-white">
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-light-border bg-white px-6">
-        <div className="flex items-center gap-4">
+    <div className="flex h-dvh w-full flex-col bg-white dark:bg-dak-bg">
+      <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-light-border bg-white px-4 py-2 dark:border-dak-border dark:bg-dak-surface sm:flex-nowrap sm:px-6 sm:py-0">
+        <div className="flex min-w-0 items-center gap-4">
           <Link
             href="/discover"
-            className="flex items-center gap-2 rounded-lg bg-[#f2f2f3] px-4 py-2 text-sm font-medium text-auth-navy"
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-[#f2f2f3] px-4 py-2 text-sm font-medium text-auth-navy dark:bg-dak-bg dark:text-dak-heading"
           >
             <Image
               src="/icons/arrow-narrow-right.svg"
               alt=""
               width={16}
               height={16}
-              className="-scale-y-100 rotate-180"
+              className="-scale-y-100 rotate-180 dark:hidden"
+            />
+            <Image
+              src="/icons/arrow-narrow-right-light.svg"
+              alt=""
+              width={16}
+              height={16}
+              className="hidden -scale-y-100 rotate-180 dark:block"
             />
             Back to post
           </Link>
-          <span className="text-base font-medium text-auth-navy">/ Abc Canvas</span>
+          <span className="truncate text-base font-medium text-auth-navy dark:text-dak-heading">/ Abc Canvas</span>
         </div>
 
-        <div className="flex items-center gap-2 text-base font-medium text-auth-navy">
-          <div className="flex size-8 items-center justify-center rounded-full bg-auth-navy/15">
+        <div className="hidden items-center gap-2 text-base font-medium text-auth-navy dark:text-dak-heading md:flex">
+          <div className="flex size-8 items-center justify-center rounded-full bg-auth-navy/15 dark:bg-dak-cta/20">
             <Image src="/icons/user-rounded-small.svg" alt="" width={16} height={16} />
           </div>
           Invited by Abc Business
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="rounded-lg bg-[#efefef] px-3 py-1.5 text-sm font-semibold text-auth-navy">
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="rounded-lg bg-[#efefef] px-3 py-1.5 text-sm font-semibold text-auth-navy dark:bg-dak-bg dark:text-dak-heading">
             Synced
           </span>
           <div className="flex items-center">
@@ -40,14 +47,14 @@ export default function CanvasFromPostPage() {
               <div
                 key={i}
                 style={{ marginLeft: i === 0 ? 0 : -10 }}
-                className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-auth-navy/70"
+                className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-auth-navy/70 dark:border-dak-surface dark:bg-dak-cta/70"
               >
                 <Image src="/icons/user-rounded-small.svg" alt="" width={16} height={16} />
               </div>
             ))}
             <div
               style={{ marginLeft: -10 }}
-              className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-[#e0dfe0] text-xs font-semibold text-auth-navy"
+              className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-[#e0dfe0] text-xs font-semibold text-auth-navy dark:border-dak-surface dark:bg-dak-border dark:text-dak-heading"
             >
               3+
             </div>
@@ -55,6 +62,8 @@ export default function CanvasFromPostPage() {
         </div>
       </header>
 
+      {/* Canvas surface intentionally kept on its own light "drafting paper" palette in both themes,
+          matching the pattern established for the other canvas-editor screens. */}
       <div className="relative flex-1 overflow-hidden bg-[#f2f0ec]">
         <div
           className="absolute inset-0"

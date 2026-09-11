@@ -18,17 +18,17 @@ const canvases = Array.from({ length: 8 }).map((_, i) => ({
 
 export default function WorkspaceFilesPage() {
   return (
-    <div className="flex gap-6">
-      <div className="w-[233px] shrink-0 overflow-hidden rounded-lg border border-light-border">
-        <div className="bg-[#e7e8e9] px-6 py-3 text-sm font-medium tracking-[0.28px] text-auth-navy">
+    <div className="flex flex-col gap-6 2xl:flex-row">
+      <div className="w-full shrink-0 overflow-hidden rounded-lg border border-light-border dark:border-dak-border 2xl:w-[233px]">
+        <div className="bg-app-dark-surface px-6 py-3 text-sm font-medium tracking-[0.28px] text-white">
           Folders
         </div>
-        <div className="flex flex-col bg-white p-2">
+        <div className="flex flex-col bg-white p-2 dark:bg-dak-surface">
           {folders.map((folder) => (
             <div
               key={folder.name}
               className={`flex items-center justify-between rounded-lg px-4 py-3 text-sm ${
-                folder.active ? "bg-auth-navy text-white" : "text-auth-navy"
+                folder.active ? "bg-app-dark-surface text-white" : "text-auth-navy dark:text-dak-heading"
               }`}
             >
               <span>{folder.name}</span>
@@ -38,13 +38,13 @@ export default function WorkspaceFilesPage() {
         </div>
       </div>
 
-      <div className="flex flex-[2] flex-wrap gap-6">
+      <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6 2xl:flex-[2]">
         {canvases.map((c, i) => (
           <WorkspaceCard key={i} variant="grid" {...c} />
         ))}
       </div>
 
-      <div className="flex flex-1 flex-col gap-6">
+      <div className="flex w-full flex-col gap-6 2xl:w-[360px] 2xl:shrink-0">
         <MembersPanel showManageRoles={false} />
         <ActivityPanel />
       </div>

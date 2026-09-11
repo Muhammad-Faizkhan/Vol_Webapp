@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -14,6 +16,16 @@
   --dak-heading: #f4f4f6;
   --dak-body: #c8cbd0;
   --dak-cta: #9436fb;
+  --dak-muted: #777a82;
+  --dak-line: #c793ff;
+  --dak-surface: #121212;
+  --dak-border: #2b2b31;
+
+  /* Light dashboard theme (purple-on-white), verified against the real Figma Home screen */
+  --app-bg: #fbf8ff;
+  --app-sidebar-active: #4a1b7d;
+  --app-badge: #d0a6fc;
+  --app-dark-surface: #020204;
 
   --light-heading: #4f626e;
   --light-body: #63758b;
@@ -34,6 +46,14 @@
   --color-dak-heading: var(--dak-heading);
   --color-dak-body: var(--dak-body);
   --color-dak-cta: var(--dak-cta);
+  --color-dak-muted: var(--dak-muted);
+  --color-dak-line: var(--dak-line);
+  --color-dak-surface: var(--dak-surface);
+  --color-dak-border: var(--dak-border);
+  --color-app-bg: var(--app-bg);
+  --color-app-sidebar-active: var(--app-sidebar-active);
+  --color-app-badge: var(--app-badge);
+  --color-app-dark-surface: var(--app-dark-surface);
   --color-light-heading: var(--light-heading);
   --color-light-body: var(--light-body);
   --color-light-border: var(--light-border);

@@ -16,29 +16,35 @@ const members: Member[] = [
 
 export function MembersPanel({ showManageRoles = true }: { showManageRoles?: boolean }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-light-border">
-      <div className="bg-[#e7e8e9] px-6 py-3 text-sm font-medium tracking-[0.28px] text-auth-navy">
+    <div className="overflow-hidden rounded-lg border border-light-border dark:border-dak-border">
+      <div className="bg-app-dark-surface px-6 py-3 text-sm font-medium tracking-[0.28px] text-white">
         Members ({members.length})
       </div>
-      <div className="flex flex-col bg-white">
+      <div className="flex flex-col bg-white dark:bg-dak-surface">
         {members.map((member, i) => (
           <div
             key={member.name + i}
-            className={`flex items-center gap-3 p-4 ${i !== 0 ? "border-t border-light-border" : ""}`}
+            className={`flex items-center gap-3 p-4 ${i !== 0 ? "border-t border-light-border dark:border-dak-border" : ""}`}
           >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-auth-navy/15">
-              <Image src="/icons/user-rounded-small.svg" alt="" width={20} height={20} />
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-auth-navy/15 dark:bg-dak-cta/20">
+              <Image
+                src="/icons/user-rounded-small.svg"
+                alt=""
+                width={20}
+                height={20}
+                className="invert dark:invert-0"
+              />
             </div>
             <div className="flex flex-1 flex-col">
-              <span className="text-sm font-medium text-auth-navy">{member.name}</span>
-              <span className="text-sm text-[#929292]">{member.role}</span>
+              <span className="text-sm font-medium text-auth-navy dark:text-dak-heading">{member.name}</span>
+              <span className="text-sm text-[#929292] dark:text-dak-muted">{member.role}</span>
             </div>
             {member.badge === "Admin" ? (
-              <span className="rounded-lg bg-auth-navy px-3 py-1.5 text-sm text-white">
+              <span className="rounded-lg bg-app-dark-surface px-3 py-1.5 text-sm text-white">
                 Admin
               </span>
             ) : (
-              <span className="rounded-lg border border-light-border px-3 py-1.5 text-sm text-auth-navy">
+              <span className="rounded-lg border border-light-border px-3 py-1.5 text-sm text-auth-navy dark:border-dak-border dark:text-dak-heading">
                 {member.badge}
               </span>
             )}
@@ -46,7 +52,7 @@ export function MembersPanel({ showManageRoles = true }: { showManageRoles?: boo
         ))}
         {showManageRoles && (
           <div className="p-4 pt-2">
-            <button className="w-full rounded-2xl bg-auth-slate py-3 text-base font-medium tracking-[0.28px] text-white shadow-[0px_8px_16px_rgba(99,117,139,0.4)]">
+            <button className="w-full rounded-2xl bg-dak-cta py-3 text-base font-medium tracking-[0.28px] text-white shadow-[0px_8px_16px_rgba(148,54,251,0.4)]">
               Manage Roles
             </button>
           </div>

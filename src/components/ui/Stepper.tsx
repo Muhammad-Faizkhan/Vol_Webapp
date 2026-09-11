@@ -9,9 +9,9 @@ export function Stepper({ steps, currentStep }: StepperProps) {
 
   return (
     <div className="relative my-6 flex items-center">
-      <div className="absolute left-4 right-4 top-4 h-0.5 bg-light-border" />
+      <div className="absolute left-4 right-4 top-4 h-0.5 bg-light-border dark:bg-dak-border" />
       <div
-        className="absolute left-4 top-4 h-0.5 bg-auth-navy"
+        className="absolute left-4 top-4 h-0.5 bg-auth-navy dark:bg-dak-cta"
         style={{ width: `calc(${fillPercent}% - ${fillPercent > 0 ? 32 * (fillPercent / 100) : 0}px)` }}
       />
       {steps.map((label, i) => {
@@ -22,15 +22,15 @@ export function Stepper({ steps, currentStep }: StepperProps) {
             <div
               className={`flex size-8 items-center justify-center rounded-full border-2 text-sm font-semibold ${
                 done
-                  ? "border-auth-navy bg-auth-navy text-white"
+                  ? "border-auth-navy bg-auth-navy text-white dark:border-dak-cta dark:bg-dak-cta"
                   : active
-                    ? "border-auth-navy bg-white text-auth-navy"
-                    : "border-light-border bg-white text-[#929292]"
+                    ? "border-auth-navy bg-white text-auth-navy dark:border-dak-cta dark:bg-dak-bg dark:text-dak-cta"
+                    : "border-light-border bg-white text-[#929292] dark:border-dak-border dark:bg-dak-surface dark:text-dak-muted"
               }`}
             >
               {done ? "✓" : i + 1}
             </div>
-            <span className="mt-2 text-xs text-auth-navy">{label}</span>
+            <span className="mt-2 text-xs text-auth-navy dark:text-dak-heading">{label}</span>
           </div>
         );
       })}
