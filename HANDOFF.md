@@ -526,6 +526,28 @@ The user reported the sidebar still didn't match Figma's proportion after the pr
 
 **Lesson for future viewport-fluid work in this codebase**: when Figma's design is a fixed reference canvas (1920px here) and a fixed-pixel measurement is ported directly to a `lg:` (or any single-breakpoint) Tailwind class, it only stays correct exactly at that one reference viewport — every other viewport inside that breakpoint's range silently drifts from Figma's actual proportion. Fixed sidebar/header/rail widths measured off Figma should generally be expressed as `clamp(floor, Xvw, Figma-px-value)` (where `X = Figma-px-value / 19.2` to convert to a vw percentage of the 1920px canvas), not `lg:w-[Figma-px-value]`, unless there's a specific reason the element should NOT scale between breakpoints.
 
+## Follow-up: `/settings` was never built against Figma at all — replaced the placeholder with the real multi-section screen
+
+The user reported the Settings screen didn't match Figma and was missing multiple options. Investigating found `src/app/(app)/settings/page.tsx` was a minimal placeholder built early in the project (just a "Dark Mode" toggle card) that never got a real Figma pass — unlike every other screen, it was missing from the "Screens completed" tracking list entirely.
+
+Finding the real screen was hard: a full-page `get_metadata` dump (no `nodeId`) is ~6MB and exceeds the tool's token limit, and a literal search for a node named `"Settings"` mostly matches the sidebar nav-item label repeated on every single screen (100+ hits) plus several large placeholder/divider frames that just say "Settings" in giant text (unbuilt scaffold stubs, not real screens — a `get_screenshot` on one of these confirmed it's just a heading placeholder). The real screen was found by instead searching the metadata dump for **content unique to a real settings screen** ("Change Password", "Delete Account", "Privacy & Legal", "Danger Zone") and walking up to the nearest ancestor frame — landing on node `559:3142` (business, dark) with siblings `564:2806` (individual, light), `562:6530`/`564:8802` (business, light/dark variants) confirming the same structure across persona/theme combinations. **Durable technique for this file**: when a screen's own name is too generic or collides with a repeated UI-chrome label (nav items, common section headers), search for distinctive body copy instead and walk up the frame tree — don't trust a name-only search alone.
+
+The real screen is a single purple/white-glow card containing four labeled sections, each a list of tappable rows (icon + label + chevron):
+- **Account**: Change password, Delete account (red-tinted icon)
+- **Preferences**: Notifications
+- **Privacy & Legal**: Privacy policy, Terms & Conditions, About Volt
+- **Support**: Help & Feedback
+
+Rewrote `settings/page.tsx` from scratch as a data-driven `sections` array matching this exactly, with exact Figma colors pulled via `get_design_context` on both the light (`564:2806`) and dark (`559:3142`) variants — notably, unlike most cards in this app, the **row background is dark in both themes** (`#251437` in light mode, `#121212` in dark mode) since the design always keeps white text/icons on a dark pill regardless of page theme; only the *outer card* switches between a plain white bordered card (light) and a purple-glow blurred card (dark, reusing the same glow treatment as the auth forms). Downloaded 8 new icon assets (`public/icons/settings-*.svg`) for the rows since none of the existing icon set matched (lock, delete/trash, bell, privacy/file, terms/file, about/info, help, and the row's chevron).
+
+**Deliberately dropped**: the old placeholder's "Dark Mode" toggle row — Figma's real Settings screen has no such row at all (the light/dark toggle only ever lives in the header, which already has a working `ThemeToggleButton`), so keeping a second one here would be inventing content not in the design.
+
+**Deliberately simplified**: Figma's dark-mode variant renders the 4 section labels ("Account", "Preferences", etc.) in a different font family (Space Grotesk) than literally everything else in the app (Inter throughout), while the light-mode variant of the same labels correctly uses Inter — this reads as a one-off editing inconsistency in the source file, not an intentional design choice, so both themes use Inter here rather than importing a whole second font family for four small labels.
+
+**Not yet functional** (scope of this fix was matching Figma's visible content, not building 5 new sub-screens): all rows are static buttons with no destination yet, matching this project's existing convention for not-yet-built destinations (e.g. notification Accept/Decline buttons elsewhere). Figma does have a real "Change Password" sub-screen (reached by tapping that row) with its own form — node `561:4875`'s sibling frames — which is a reasonable next screen to build if the user asks for it specifically.
+
+**Verified**: `npm run lint` and `npm run build` clean, 0px horizontal overflow at 1920px and 400px (mobile), light/dark/mobile screenshots all confirm the four sections render correctly with real icons and copy matching Figma.
+
 ## How to resume in a new session
 
 1. Open this repo in Claude Code, confirm Figma MCP access (`whoami` should return the same account).
