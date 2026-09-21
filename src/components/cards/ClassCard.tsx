@@ -15,7 +15,7 @@ export function ClassCard({ href, title, subtitle, modules, tag, progress, image
   return (
     <Link
       href={href}
-      className="flex w-full flex-col overflow-hidden rounded-lg border border-light-border bg-white dark:border-dak-border dark:bg-dak-surface"
+      className="flex w-full flex-col overflow-hidden rounded-lg bg-white shadow-[0px_4px_8px_0px_rgba(43,43,49,0.2)] dark:bg-dak-surface"
     >
       <div className="relative flex h-[130px] items-center justify-center overflow-hidden bg-auth-navy dark:bg-dak-surface">
         {imageSrc ? (
@@ -29,9 +29,9 @@ export function ClassCard({ href, title, subtitle, modules, tag, progress, image
           </span>
         )}
       </div>
-      <div className="flex flex-col gap-1 p-4">
-        <h4 className="text-base font-medium text-auth-navy dark:text-dak-heading">{title}</h4>
-        <p className="text-sm text-[#929292] dark:text-dak-muted">{subtitle}</p>
+      <div className="flex flex-col gap-2 p-4">
+        <h4 className="text-base font-medium tracking-[0.28px] text-[#020204] dark:text-dak-heading">{title}</h4>
+        <p className="text-sm tracking-[0.28px] text-[#2b2b31] dark:text-dak-muted">{subtitle}</p>
         {progress !== undefined ? (
           <div className="flex flex-col gap-1.5 pt-2">
             <div className="flex justify-between text-sm">
@@ -46,7 +46,7 @@ export function ClassCard({ href, title, subtitle, modules, tag, progress, image
             </div>
           </div>
         ) : (
-          <p className="text-sm text-[#929292] dark:text-dak-muted">{modules}</p>
+          <p className="text-sm text-[#45464d] dark:text-dak-muted">{modules}</p>
         )}
       </div>
     </Link>

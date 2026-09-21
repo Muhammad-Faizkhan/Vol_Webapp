@@ -9,10 +9,12 @@ type WorkspaceCardProps = {
   editedAgo?: string;
   updatedTag?: string;
   collaboratorInitials?: string[];
+  collaboratorAvatars?: string[];
   collaboratorCount?: number;
   meta?: string;
   metaSecondary?: string;
   imageSrc?: string;
+  showCollaboratorFooter?: boolean;
 };
 
 export function WorkspaceCard({
@@ -23,17 +25,19 @@ export function WorkspaceCard({
   editedAgo,
   updatedTag,
   collaboratorInitials = [],
+  collaboratorAvatars = [],
   collaboratorCount = 0,
   meta,
   metaSecondary,
   imageSrc,
+  showCollaboratorFooter = true,
 }: WorkspaceCardProps) {
-  const showFooter = collaboratorCount > 0;
+  const showFooter = showCollaboratorFooter && collaboratorCount > 0;
 
   return (
     <Link
       href={href}
-      className="flex w-full flex-col overflow-hidden rounded-lg border border-light-border bg-[#f8f9ff] dark:border-dak-border dark:bg-dak-surface"
+      className="flex w-full flex-col overflow-hidden rounded-lg border border-[rgba(43,43,49,0.4)] bg-white shadow-[0px_4px_8px_0px_rgba(43,43,49,0.2)] dark:border-dak-border dark:bg-dak-surface"
     >
       <div className="relative flex h-[130px] items-end justify-end overflow-hidden bg-auth-navy p-4 dark:bg-dak-surface">
         {imageSrc ? (
@@ -47,7 +51,7 @@ export function WorkspaceCard({
             className="relative z-10"
           />
         )}
-        <span className="absolute right-6 top-4 rounded-sm border border-light-border bg-[#f8f9ff] px-[9px] py-[5px] text-[10px] font-medium text-auth-navy dark:border-dak-border dark:bg-dak-bg dark:text-dak-heading">
+        <span className="absolute right-6 top-4 rounded-lg bg-[#45464d] px-2 py-1 text-[10px] font-medium text-white">
           {updatedTag ?? `+${collaboratorCount} Collabs`}
         </span>
       </div>
@@ -68,20 +72,30 @@ export function WorkspaceCard({
         )}
       </div>
       {showFooter && (
-        <div className="flex items-center gap-2 border-t border-light-border px-4 pt-[13px] dark:border-dak-border">
+        <div className="flex items-center gap-2 border-t border-[#c793ff] px-4 pt-[13px] dark:border-dak-border">
           <div className="flex items-center">
-            {(collaboratorInitials.length > 0
-              ? collaboratorInitials
-              : Array.from({ length: Math.min(collaboratorCount, 3) }).map(() => "")
-            ).map((initial, i) => (
-              <span
-                key={i}
-                style={{ marginLeft: i === 0 ? 0 : -8 }}
-                className="flex size-6 items-center justify-center rounded-full border border-[#f8f9ff] bg-auth-navy/10 text-[10px] font-bold text-auth-navy dark:border-dak-surface dark:bg-dak-cta/20 dark:text-dak-heading"
-              >
-                {initial}
-              </span>
-            ))}
+            {collaboratorAvatars.length > 0
+              ? collaboratorAvatars.map((avatar, i) => (
+                  <span
+                    key={i}
+                    style={{ marginLeft: i === 0 ? 0 : -8 }}
+                    className="relative size-6 shrink-0 overflow-hidden rounded-full border-2 border-white dark:border-dak-surface"
+                  >
+                    <Image src={avatar} alt="" fill className="object-cover" />
+                  </span>
+                ))
+              : (collaboratorInitials.length > 0
+                  ? collaboratorInitials
+                  : Array.from({ length: Math.min(collaboratorCount, 3) }).map(() => "")
+                ).map((initial, i) => (
+                  <span
+                    key={i}
+                    style={{ marginLeft: i === 0 ? 0 : -8 }}
+                    className="flex size-6 items-center justify-center rounded-full border border-[#f8f9ff] bg-auth-navy/10 text-[10px] font-bold text-auth-navy dark:border-dak-surface dark:bg-dak-cta/20 dark:text-dak-heading"
+                  >
+                    {initial}
+                  </span>
+                ))}
           </div>
           <span className="pl-2 text-base text-auth-navy dark:text-dak-heading">
             +{collaboratorCount} Collabs

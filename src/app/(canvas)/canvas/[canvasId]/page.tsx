@@ -1,7 +1,18 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
-const toolbarIcons = ["cursor", "hand", "pen", "shapes", "text", "comment", "image"];
+const tools = [
+  { id: "select", label: "Selection tool" },
+  { id: "hand", label: "Pan tool" },
+  { id: "pen", label: "Pen tool" },
+  { id: "shapes", label: "Shape tool" },
+  { id: "text", label: "Text tool" },
+  { id: "comment", label: "Comment tool" },
+  { id: "image", label: "Insert image" },
+];
 
 const products = [
   { name: "Abc Product", by: "By Abc Distributor", qty: "x2" },
@@ -9,7 +20,14 @@ const products = [
   { name: "Abc Product", by: "By Abc Distributor", qty: "x2" },
 ];
 
+const MIN_ZOOM = 25;
+const MAX_ZOOM = 200;
+const DEFAULT_ZOOM = 70;
+
 export default function CanvasEditorPage() {
+  const [activeTool, setActiveTool] = useState("select");
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+
   return (
     <div className="flex h-dvh w-full flex-col bg-white">
       <header className="flex min-h-16 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-light-border bg-white px-4 py-2 dark:border-dak-border dark:bg-dak-bg sm:flex-nowrap sm:px-6 sm:py-0">
@@ -61,90 +79,8 @@ export default function CanvasEditorPage() {
         </div>
       </header>
 
-      <div className="relative flex-1 overflow-hidden bg-[#f2f0ec]">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(#e3e0da 1px,transparent 1px),linear-gradient(90deg,#e3e0da 1px,transparent 1px)",
-            backgroundSize: "68px 68px",
-          }}
-        />
-
-        <div className="absolute left-10 top-1/2 flex w-20 -translate-y-1/2 flex-col items-center gap-3 rounded-xl border border-light-border bg-[#f8f9ff] p-2 shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1)]">
-          {toolbarIcons.map((tool, i) => (
-            <div key={tool} className="flex w-full flex-col items-center gap-3">
-              <div
-                className={`flex size-10 items-center justify-center rounded-xl text-auth-navy ${i === 0 ? "bg-auth-navy/20" : ""}`}
-              >
-                <div className="size-4 rounded-sm border-2 border-auth-navy" />
-              </div>
-              {(i === 1 || i === 4) && <div className="h-px w-8 bg-light-border" />}
-            </div>
-          ))}
-        </div>
-
-        <div className="absolute left-40 right-[520px] top-10 bottom-10">
-          <div className="absolute left-[170px] top-[120px] h-[399px] w-[591px] border-2 border-auth-navy bg-[rgba(251,251,250,0.69)]">
-            <span className="absolute -top-8 left-10 whitespace-nowrap rounded bg-[#f2f0ec] px-4 py-1 text-xs font-medium text-auth-navy">
-              Abc Canvas. 3.9 M x 3.0 M
-            </span>
-
-            <div className="absolute left-0 top-0 h-[220px] w-[320px] bg-[#e3e3e3]">
-              <div className="absolute left-1/2 top-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-lg bg-auth-navy">
-                <Image src="/illustrations/auth-placeholder.svg" alt="" width={28} height={28} />
-              </div>
-              <span className="absolute bottom-3 left-3 whitespace-nowrap rounded bg-auth-navy px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-                600×1200 · True scale
-              </span>
-            </div>
-            <span className="absolute left-5 top-[236px] whitespace-nowrap rounded bg-auth-navy px-3 py-1 text-xs font-medium text-white">
-              John S.
-            </span>
-
-            <div className="absolute left-[390px] top-[92px] flex size-[100px] items-center justify-center rounded-full border border-[#c9c8c8] bg-[#e0dfe0]" />
-            <span className="absolute left-[390px] top-[202px] w-[100px] text-center text-sm font-medium text-auth-navy">
-              420 MM
-            </span>
-            <span className="absolute left-[400px] top-[228px] whitespace-nowrap rounded bg-auth-navy px-3 py-1 text-xs font-medium text-white">
-              Sarah J.
-            </span>
-
-            <div className="absolute left-5 top-[320px] w-[262px]">
-              <div className="h-[21px] bg-[#cfd8dd]" />
-              <span className="mt-1 block text-center text-sm font-medium text-auth-navy">
-                Linear Drain 900 MM
-              </span>
-            </div>
-          </div>
-
-          <div className="absolute right-[60px] top-20 w-[163px] rounded-bl-lg border border-[#80939e] bg-[#f4f4f4] p-3.5 shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1)]">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-auth-navy">
-              Note - Mark
-            </p>
-            <p className="text-xs leading-snug text-auth-navy">
-              Confirm substrate prep here before laying the initial row.
-              Tolerance is extremely tight.
-            </p>
-          </div>
-          <span className="absolute right-[70px] top-[192px] whitespace-nowrap rounded bg-auth-navy px-3 py-1 text-xs font-medium text-white">
-            Mark W.
-          </span>
-        </div>
-
-        <div className="absolute bottom-6 left-6 flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm text-auth-navy shadow-[0px_1px_3px_rgba(0,0,0,0.1)]">
-          <span>−</span>
-          <span>70%</span>
-          <span>+</span>
-          <span className="text-light-border">|</span>
-          <span>Fit</span>
-        </div>
-        <div className="absolute bottom-6 right-[420px] flex items-center gap-2 rounded-lg bg-auth-navy px-4 py-2 text-sm text-white">
-          <span className="size-2 rounded-full bg-[#22c55e]" />
-          3 Collaboratives Live
-        </div>
-
-        <aside className="absolute right-0 top-0 flex h-full w-[400px] flex-col gap-6 overflow-y-auto bg-[#d9d9d9] p-6 dark:bg-dak-bg">
+      <div className="flex min-h-0 flex-1 flex-col-reverse md:flex-row">
+        <aside className="flex h-[45dvh] min-h-0 w-full shrink-0 flex-col gap-6 overflow-y-auto border-t border-light-border bg-[#d9d9d9] p-6 dark:border-dak-border dark:bg-dak-bg md:h-auto md:w-[400px] md:border-l md:border-t-0">
           <div>
             <h3 className="mb-3 text-base font-semibold text-auth-navy dark:text-dak-heading">
               Selected Product
@@ -202,6 +138,124 @@ export default function CanvasEditorPage() {
             </div>
           </div>
         </aside>
+
+        <div className="relative min-h-0 flex-1 overflow-hidden bg-[#f2f0ec]">
+          <div className="absolute inset-0 overflow-auto">
+          <div
+            className="relative"
+            style={{
+              width: "max(100%, 1400px)",
+              height: "max(100%, 900px)",
+              backgroundImage:
+                "linear-gradient(#e3e0da 1px,transparent 1px),linear-gradient(90deg,#e3e0da 1px,transparent 1px)",
+              backgroundSize: "68px 68px",
+            }}
+          >
+            <div
+              className="absolute left-[220px] top-[160px] h-[399px] w-[591px] border-2 border-auth-navy bg-[rgba(251,251,250,0.69)]"
+              style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top left" }}
+            >
+              <span className="absolute -top-8 left-10 whitespace-nowrap rounded bg-[#f2f0ec] px-4 py-1 text-xs font-medium text-auth-navy">
+                Abc Canvas. 3.9 M x 3.0 M
+              </span>
+
+              <div className="absolute left-0 top-0 h-[220px] w-[320px] bg-[#e3e3e3]">
+                <div className="absolute left-1/2 top-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-lg bg-auth-navy">
+                  <Image src="/illustrations/auth-placeholder.svg" alt="" width={28} height={28} />
+                </div>
+                <span className="absolute bottom-3 left-3 whitespace-nowrap rounded bg-auth-navy px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                  600×1200 · True scale
+                </span>
+              </div>
+              <span className="absolute left-5 top-[236px] whitespace-nowrap rounded bg-auth-navy px-3 py-1 text-xs font-medium text-white">
+                John S.
+              </span>
+
+              <div className="absolute left-[390px] top-[92px] flex size-[100px] items-center justify-center rounded-full border border-[#c9c8c8] bg-[#e0dfe0]" />
+              <span className="absolute left-[390px] top-[202px] w-[100px] text-center text-sm font-medium text-auth-navy">
+                420 MM
+              </span>
+              <span className="absolute left-[400px] top-[228px] whitespace-nowrap rounded bg-auth-navy px-3 py-1 text-xs font-medium text-white">
+                Sarah J.
+              </span>
+
+              <div className="absolute left-5 top-[320px] w-[262px]">
+                <div className="h-[21px] bg-[#cfd8dd]" />
+                <span className="mt-1 block text-center text-sm font-medium text-auth-navy">
+                  Linear Drain 900 MM
+                </span>
+              </div>
+            </div>
+
+            <div className="absolute right-[100px] top-20 w-[163px] rounded-bl-lg border border-[#80939e] bg-[#f4f4f4] p-3.5 shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1)]">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-auth-navy">
+                Note - Mark
+              </p>
+              <p className="text-xs leading-snug text-auth-navy">
+                Confirm substrate prep here before laying the initial row.
+                Tolerance is extremely tight.
+              </p>
+            </div>
+            <span className="absolute right-[110px] top-[192px] whitespace-nowrap rounded bg-auth-navy px-3 py-1 text-xs font-medium text-white">
+              Mark W.
+            </span>
+          </div>
+          </div>
+
+          <div className="pointer-events-none absolute inset-0">
+            <div className="pointer-events-auto absolute left-10 top-1/2 flex w-20 -translate-y-1/2 flex-col items-center gap-3 rounded-xl border border-light-border bg-[#f8f9ff] p-2 shadow-[0px_4px_6px_-1px_rgba(0,0,0,0.1)]">
+              {tools.map((tool, i) => (
+                <div key={tool.id} className="flex w-full flex-col items-center gap-3">
+                  <button
+                    type="button"
+                    aria-label={tool.label}
+                    aria-pressed={activeTool === tool.id}
+                    onClick={() => setActiveTool(tool.id)}
+                    className={`flex size-10 items-center justify-center rounded-xl text-auth-navy transition-colors hover:bg-auth-navy/10 ${
+                      activeTool === tool.id ? "bg-auth-navy/20" : ""
+                    }`}
+                  >
+                    <div className="size-4 rounded-sm border-2 border-auth-navy" />
+                  </button>
+                  {(i === 1 || i === 4) && <div className="h-px w-8 bg-light-border" />}
+                </div>
+              ))}
+            </div>
+
+            <div className="pointer-events-auto absolute bottom-6 left-6 flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-sm text-auth-navy shadow-[0px_1px_3px_rgba(0,0,0,0.1)]">
+              <button
+                type="button"
+                aria-label="Zoom out"
+                onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 10))}
+                className="flex size-7 items-center justify-center rounded hover:bg-auth-navy/10"
+              >
+                −
+              </button>
+              <span className="w-10 text-center tabular-nums">{zoom}%</span>
+              <button
+                type="button"
+                aria-label="Zoom in"
+                onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + 10))}
+                className="flex size-7 items-center justify-center rounded hover:bg-auth-navy/10"
+              >
+                +
+              </button>
+              <span className="mx-1 text-light-border">|</span>
+              <button
+                type="button"
+                onClick={() => setZoom(DEFAULT_ZOOM)}
+                className="rounded px-2 py-1 hover:bg-auth-navy/10"
+              >
+                Fit
+              </button>
+            </div>
+
+            <div className="pointer-events-auto absolute bottom-6 right-6 flex items-center gap-2 rounded-lg bg-auth-navy px-4 py-2 text-sm text-white">
+              <span className="size-2 rounded-full bg-[#22c55e]" />
+              3 Collaboratives Live
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

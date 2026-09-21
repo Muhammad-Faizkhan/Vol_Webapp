@@ -1,41 +1,67 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { WorkspaceCard } from "@/components/cards/WorkspaceCard";
 
-const workspaces = Array.from({ length: 6 }).map((_, i) => ({
+const workspaces = Array.from({ length: 4 }).map((_, i) => ({
   href: `/workspaces/${i + 1}`,
   title: "Abc Workspace",
   meta: "8 canvases · 5 members",
   metaSecondary: "Edited 12min ago . 4 Products",
   collaboratorCount: 3,
-  imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
+  updatedTag: i % 2 === 1 ? "UPDATED 2H AGO" : undefined,
+  imageSrc: "/illustrations/canvas-thumb-moodboard.png",
 }));
 
-const businessProfiles = [
-  { name: "Abc Business", sub: "Distributor. 1,203 products", avatar: "/avatars/avatar-1.jpg" },
-  { name: "Abc Business", sub: "Distributor. 1,203 products", avatar: "/avatars/avatar-2.jpg" },
-  { name: "Abc Business", sub: "Distributor. 1,203 products", avatar: "/avatars/avatar-3.jpg" },
-  { name: "Abc Business", sub: "Distributor. 1,203 products", avatar: "/avatars/avatar-1.jpg" },
-];
+const businessWorkspaceAvatars = ["/avatars/avatar-1.jpg", "/avatars/avatar-2.jpg", "/avatars/avatar-3.jpg"];
+
+const businessWorkspaces = Array.from({ length: 4 }).map((_, i) => ({
+  href: `/workspaces/business-${i + 1}`,
+  title: "Lorem Ipsum Title",
+  workspace: "Lorem Ipsum Workspace",
+  editedAgo: "Edited 12min ago",
+  updatedTag: "UPDATED 2H AGO",
+  collaboratorAvatars: businessWorkspaceAvatars,
+  collaboratorCount: 2,
+  imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
+}));
 
 export default function WorkspacesPage() {
   const [tab, setTab] = useState<"business" | "mine">("mine");
 
   return (
     <div className="flex w-full flex-col gap-7">
-      <div className="flex items-center gap-4 sm:gap-6">
-        <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl border border-light-border dark:border-dak-border sm:size-20">
-          <Image src="/illustrations/canvas-thumb-mortar-pattern.jpg" alt="" fill className="object-cover" />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex items-center gap-4 sm:gap-6">
+          <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl border border-auth-navy dark:border-dak-border sm:size-20">
+            <Image src="/illustrations/classroom-thumb-engineers.jpg" alt="" fill className="object-cover" />
+          </div>
+          <div className="flex flex-col gap-2 sm:gap-4">
+            <h1 className="text-2xl font-bold tracking-[-0.32px] text-auth-navy sm:text-[32px] dark:text-dak-heading">
+              Workspaces
+            </h1>
+            <p className="text-base text-auth-slate dark:text-dak-body">
+              8 Lorem Ipsum is simply dummy text of the printing and typesetting
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-2 sm:gap-4">
-          <h1 className="text-2xl font-bold tracking-[-0.32px] text-auth-navy sm:text-[32px] dark:text-dak-heading">
-            Workspaces
-          </h1>
-          <p className="text-base text-auth-slate dark:text-dak-body">
-            8 Lorem Ipsum is simply dummy text of the printing and typesetting
-          </p>
+        <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start">
+          <Link
+            href="/canvas/1"
+            className="flex h-14 items-center justify-center gap-4 rounded-xl border border-light-border bg-app-dark-surface px-[17px] text-base text-white"
+          >
+            <Image src="/icons/new-canvas-white.svg" alt="" width={12} height={15} />
+            Create Canvas
+          </Link>
+          <Link
+            href="/workspaces/create"
+            className="flex h-14 items-center justify-center gap-4 rounded-xl bg-dak-cta px-4 text-base text-white"
+          >
+            <Image src="/icons/new-workspace.svg" alt="" width={16} height={12} />
+            Create Workspace
+          </Link>
         </div>
       </div>
 
@@ -65,27 +91,13 @@ export default function WorkspacesPage() {
       {tab === "mine" ? (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
           {workspaces.map((ws, i) => (
-            <WorkspaceCard key={i} variant="grid" {...ws} />
+            <WorkspaceCard key={i} variant="grid" showCollaboratorFooter={false} {...ws} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
-          {businessProfiles.map((biz, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 rounded-lg border border-light-border bg-[#f8f9ff] p-4 dark:border-dak-border dark:bg-dak-surface"
-            >
-              <div className="relative size-12 shrink-0 overflow-hidden rounded-full">
-                <Image src={biz.avatar} alt="" fill className="object-cover" />
-              </div>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-sm font-medium text-auth-navy dark:text-dak-heading">{biz.name}</span>
-                <span className="truncate text-xs text-[#929292] dark:text-dak-muted">{biz.sub}</span>
-              </div>
-              <button className="shrink-0 rounded-lg bg-auth-navy px-3 py-1.5 text-xs font-medium text-white dark:bg-dak-cta">
-                Add
-              </button>
-            </div>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
+          {businessWorkspaces.map((ws, i) => (
+            <WorkspaceCard key={i} {...ws} />
           ))}
         </div>
       )}
