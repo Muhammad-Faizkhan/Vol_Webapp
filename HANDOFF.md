@@ -175,7 +175,7 @@ For finding a screen's correct Figma node in future work: the "Ui Design" page's
 - `workspaces/[id]/(tabs)/` — nested route group so the Canvases/Files/Members tab bar wraps only those three tabs, **not** `workspaces/[id]/invite` (that's a sibling outside `(tabs)`, deliberately — the Figma Invite screen has no tab bar). If you add more workspace-detail sub-pages that shouldn't show tabs, keep them as siblings of `(tabs)`, not inside it.
 - Design tokens live in `src/app/globals.css` under `:root` + `@theme inline` (maps to `bg-auth-navy`, `text-auth-slate`, `border-light-border`, `bg-dak-bg`, etc. — see file for the full list, all ported from `reference/dc.html`'s CSS custom properties).
 
-## Screens completed (27)
+## Screens completed (36)
 
 **Auth flow (5/5):** Login, Sign Up, OTP Verification, Forgot Password, Reset Password
 **Role selection (2/2):** Join Network light (`/join-network`), Join Network dark (`/join-network-dark`)
@@ -183,18 +183,14 @@ For finding a screen's correct Figma node in future work: the "Ui Design" page's
 **Home/Workspace flow (8/9 — Activity+Visibility merged into Members tab per kickoff note):**
 `/home`, `/workspaces`, `/workspaces/[id]/canvases`, `/workspaces/[id]/files`, `/workspaces/[id]/members` (includes the workspace Visibility settings section), `/canvas/[canvasId]`, `/workspaces/create`, `/workspaces/[id]/invite`
 **Discover flow (5/5):** `/discover`, `/discover/post/[postId]`, `/discover/create-post`, `/discover/select-canvas`, `/discover-canvas/[postId]`
-**Explore/Classrooms/Business (8/8 — all done):** `/explore`, `/classrooms`, `/classrooms/[classroomId]`, `/classrooms/manage`, `/business/dashboard` (Products catalog, Figma node `562:32050`), `/business/home` (Business Home dashboard, Figma node `562:31634`), `/profile`, `/profile/edit` + `/profile/edit-business` (share `ProfileOverview` component with a `persona` prop)
+**Explore/Classrooms/Business (9/8 — all done, plus one extra not in the original count):** `/explore`, `/classrooms`, `/classrooms/[classroomId]`, `/classrooms/manage`, `/business/dashboard` (Products catalog, Figma node `562:32050`), `/business/home` (Business Home dashboard, Figma node `562:31634`), `/profile`, `/profile/edit` + `/profile/edit-business` (share `ProfileOverview` component with a `persona` prop), `/business/[id]` (Business Profile detail / "View Profile" destination — added in the Home/Discover/Explore/Workspaces/Classrooms rebuild commit, never tracked in this list until now)
+**Creation flows (9/5 planned — all done, see follow-up section below for details):** `/business/products/add` (Identity+Specs combined, per Figma), `/business/products/add/review`, `/business/products/[productId]/edit`, `/classrooms/create`, `/classrooms/create/curriculum`, `/classrooms/create/module`, `/classrooms/create/review`
 
-## Screens remaining (8) — with Figma node IDs
+Note: the kickoff brief's original 39-screen count included some screens this session judged redundant with what was already built (e.g. Workspace Activity+Visibility were merged into the Members & Roles tab per the brief's own instruction to "split into logical sections" rather than a literal 1:1 screen), and this session found at least one Figma screen (`/business/[id]`) that was never in the original 39-count bookkeeping at all. If the 39 count needs to reconcile exactly, double check against `claude-code-kickoff-prompt.md`'s full list rather than trusting this doc's running totals literally.
 
-### Creation flows (5 left)
-- Add New Product (multi-step: Identity → Specs → Review) — node `154:2`
-- Edit Product — node `157:846`
-- Create Classroom (course identity form) — node `157:4705`
-- Create Module (curriculum/lesson builder) — node `162:5494`
-- Curriculum Builder (module overview, step 2 of classroom creation) — node `160:4973`
+## Screens remaining
 
-Note: the kickoff brief's original 39-screen count included some screens this session judged redundant with what was already built (e.g. Workspace Activity+Visibility were merged into the Members & Roles tab per the brief's own instruction to "split into logical sections" rather than a literal 1:1 screen). If the 39 count needs to reconcile exactly, double check against `claude-code-kickoff-prompt.md`'s full list before assuming these 8 are the only gap.
+None known. Every screen from the previous "remaining" list is now built — see the follow-up section below for what was actually found in Figma (the kickoff brief's node IDs for this batch were on the wrong page, same "Wireframes vs. Ui Design" trap documented earlier in this file) and any scope notes.
 
 ### New components built this batch (in addition to the earlier list)
 - `ClassCard` (`src/components/cards/ClassCard.tsx`) — optional `tag` + `progress` props for the "Active Classroom" progress-bar variant vs. the plain modules-count variant
@@ -548,8 +544,36 @@ Rewrote `settings/page.tsx` from scratch as a data-driven `sections` array match
 
 **Verified**: `npm run lint` and `npm run build` clean, 0px horizontal overflow at 1920px and 400px (mobile), light/dark/mobile screenshots all confirm the four sections render correctly with real icons and copy matching Figma.
 
+## Follow-up: the last 5 "remaining" creation-flow screens built — kickoff brief's node IDs were on the wrong page again
+
+The user asked to finish the 5 screens this doc had listed as remaining (Add New Product, Edit Product, Create Classroom, Create Module, Curriculum Builder). Before building anything, each suggested route was checked directly against the live app (not just trusted from this doc, which turned out to be stale in one respect — see below) to confirm what was actually missing: `/classrooms/manage` already had a live "Create Classroom" button linking to `/classrooms/create` (404), and `/business/dashboard`/`/business/home`/`/business/[id]` already linked to `/business/products/[productId]/edit` (404) — both real dead links in production, not hypothetical gaps. `/business/products/add` (step 1, "Identity") already existed and was correct, but its "Continue to Specs" button linked to a 404.
+
+**Same Figma pitfall as the pinned-memory page-decoy issue, confirmed again on new nodes**: this doc's kickoff-brief node IDs for all 5 screens (`154:2`, `157:846`, `157:4705`, `160:4973`, `162:5494`) were checked and — as suspected going in — were on the wrong "Wireframes" page (`0:1`), not the real "Ui Design" page (`415:5112`). `157:4705` was screenshotted directly and confirmed: flat grey/navy palette, plain text "Logo" circle, generic monochrome icons — the exact decoy pattern the pinned memory warns about. **Any future session pulling a node ID from the original kickoff brief (`claude-code-kickoff-prompt.md`) should assume it's on the wrong page until proven otherwise by screenshot**, not just for screens this doc happens to flag.
+
+The correct nodes were found on `415:5112` (file `U0ViacZ05fpboMsZI0c6X5`) by dumping the page's metadata to a file and grepping for distinctive body copy unique to each screen (e.g. "Course Identity & Structure", "Curriculum Builder", "Create New Module", "Add New Product", "Edit Product"), then walking up to each top-level 1920×1080 frame and confirming visually — the same technique already documented earlier in this file for `/settings`. Two dedicated agents did this work (one per flow) directly against the live tree (not `isolation: "worktree"`, learning from the earlier documented staleness problem), then the coordinator verified both with a fresh `npm run build`/`npm run lint`/screenshot pass before accepting the work.
+
+**Figma nodes used** (file `U0ViacZ05fpboMsZI0c6X5`, dark/light pairs where both were found):
+- Create Classroom: dark `514:3066`, light `562:32614`
+- Curriculum Builder: dark `514:3237`, light `562:32770`
+- Create New Module: dark `514:3540`, light `562:33035`
+- Classroom Review & Publish (a 4th step Figma's own stepper requires but the kickoff brief never separately listed — added so the flow doesn't dead-end): dark `514:3719`, light `562:33194`
+- Add New Product (Identity + Specs, confirmed as one combined frame in Figma, not two): dark `514:2860`, light `562:32421`
+- Product Review & Publish: dark `514:4102`, light `562:33541`
+- Edit Product (confirmed to be a pre-filled variant of Add Product's Identity+Dimensions fields, not a distinct Figma frame — built accordingly rather than inventing new content): dark `514:3914`, light `562:33368`
+
+**Real content findings, not just page-decoy issues**:
+- Figma has no separate "Specs" screen for Add New Product — Identity and Dimensions/weight fields live on one frame, with "Next Step" going straight to Review. The existing 3-position `Stepper` labels (Identity/Specs/Review) were kept unchanged since they still describe the logical grouping correctly, but there's no dedicated Specs *page* — `/business/products/add` covers both. Also added a previously-missing "Total Weight" field to complete Figma's 2×2 Height/Width/Length/Weight grid (was 3 plain fields before).
+- Edit Product's subtitle in Figma is literally un-replaced "Lorem Ipsum is simply dummy text..." filler — kept verbatim per this project's established "mock data matches Figma placeholder content exactly" convention, not fixed to real copy.
+- The classroom flow's discrete "Add New Lesson" screen (a separate Figma frame) was folded into a static "Add Lesson" button with no destination, consistent with this app's existing pattern for intentionally-unwired actions (e.g. Settings' rows, notification Accept/Decline elsewhere). A few small icons (module options-dots, collapse chevron, some lesson-type icons) reuse existing app icons as close visual matches rather than pulling new exact SVGs — flagging in case pixel-exact fidelity on those specific icons is wanted later.
+- One real copy-paste bug was caught and fixed by the coordinator after the agent finished: the new "Create New Module" screen had Curriculum Builder's subtitle text verbatim ("Drag and drop modules and lessons...") instead of its own — changed to a description matching what that screen actually does ("Add a new curriculum item and place it within your course structure.").
+- One real layout bug was caught and fixed by the agent during its own verification: the product Review & Publish page's 3 thumbnail images used fixed `size-[130px]` flex items, causing 63px of horizontal overflow at 375px — changed to a `grid-cols-3` layout with `aspect-square`/`min-w-0`, now 0px overflow at both 1920px and 375px.
+
+**New files**: `src/app/(app)/classrooms/create/page.tsx`, `.../curriculum/page.tsx`, `.../module/page.tsx`, `.../review/page.tsx`; `src/app/(app)/business/products/add/review/page.tsx`; `src/app/(app)/business/products/[productId]/edit/page.tsx`. **Edited**: `src/app/(app)/business/products/add/page.tsx` (2×2 dimensions grid + weight field, real Cancel/Next Step actions replacing the old single dead link). New icons downloaded from Figma: `public/icons/clock-small.svg`, `public/icons/edit-pencil.svg`, plus others pulled during the classroom-flow build. No existing call sites needed changing — `classrooms/manage`'s "Create Classroom" button and every product card's Edit link already pointed at the correct paths, they'd just been dead links until now.
+
+**Verified**: `npm run build` and `npm run lint` both clean (only a pre-existing unrelated lint warning on `classrooms/join/page.tsx` remains). Full end-to-end click paths confirmed working, not just individual pages: `/classrooms/manage` → Create Classroom → Curriculum → Add Module → Review & Publish → Publish Course → lands on `/classrooms/1` (real page); `/business/dashboard` → a product card's Edit action → real Edit Product page; `/business/products/add` → Next Step → Review → Publish Product → `/business/dashboard`. 0px horizontal overflow confirmed at 1920px and 375px on every new screen, in both light and dark mode.
+
 ## How to resume in a new session
 
 1. Open this repo in Claude Code, confirm Figma MCP access (`whoami` should return the same account).
 2. Read this file, then `reference/dc.html` if screen-specific copy/structure needs cross-checking.
-3. Pick the next unbuilt screen from "Screens remaining" above, follow the workflow section, and keep updating this file's "Screens completed" / "Screens remaining" lists as you go so the next handoff stays accurate.
+3. This doc's tracked "Screens remaining" list is currently empty as of the follow-up above — if the user reports a screen still missing or wrong, re-verify against Figma directly (don't assume this doc is exhaustive; it has been caught stale before, e.g. the `/business/[id]` Business Profile detail page existed in the app for a full commit before this doc mentioned it) rather than treating "Screens remaining: None" as proof nothing is left.
