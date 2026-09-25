@@ -21,13 +21,13 @@ export function ProfileOverview({ persona }: { persona: "individual" | "business
       </div>
 
       <div className="overflow-hidden rounded-lg border border-light-border bg-white dark:border-dak-border dark:bg-dak-surface">
-        <div className="flex h-[190px] items-center justify-center bg-[#b3b3b3] dark:bg-dak-bg">
-          <Image src="/illustrations/auth-placeholder.svg" alt="" width={28} height={28} />
+        <div className="relative h-[190px] w-full">
+          <Image src="/illustrations/profile-cover.png" alt="" fill className="object-cover" />
         </div>
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
             <div className="relative size-24 shrink-0 overflow-hidden rounded-full border-4 border-white dark:border-dak-surface sm:-mt-14 sm:size-28">
-              <Image src={isBusiness ? "/avatars/avatar-3.jpg" : "/avatars/avatar-2.jpg"} alt="" fill className="object-cover" />
+              <Image src={isBusiness ? "/avatars/avatar-3.jpg" : "/avatars/avatar-1.jpg"} alt="" fill className="object-cover" />
             </div>
             <div className="flex flex-col">
               <h2 className="text-2xl font-bold text-auth-navy dark:text-dak-heading">

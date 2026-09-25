@@ -1,10 +1,10 @@
 import Image from "next/image";
 
 const members = [
-  { name: "Alex Morgan", email: "Alexmorgan@domain.com", type: "Instructor", role: "Admin", you: false },
-  { name: "Mark Williams", email: "markwilliams@domain.com", type: "Contractor", role: "Viewer", you: false },
-  { name: "John Smith", email: "You", type: "Contractor", role: "Collaborator", you: true },
-  { name: "Mark Williams", email: "markwilliams@domain.com", type: "Contractor", role: "Collaborator", you: false },
+  { name: "Alex Morgan", email: "Alexmorgan@domain.com", type: "Instructor", role: "Admin", you: false, avatar: "/avatars/avatar-1.jpg" },
+  { name: "Mark Williams", email: "markwilliams@domain.com", type: "Contractor", role: "Viewer", you: false, avatar: "/avatars/avatar-2.jpg" },
+  { name: "John Smith", email: "You", type: "Contractor", role: "Collaborator", you: true, avatar: "/avatars/avatar-3.jpg" },
+  { name: "Mark Williams", email: "markwilliams@domain.com", type: "Contractor", role: "Collaborator", you: false, avatar: "/avatars/avatar-2.jpg" },
 ];
 
 export default function WorkspaceMembersPage() {
@@ -25,14 +25,8 @@ export default function WorkspaceMembersPage() {
                   className={`flex items-center px-6 py-4 ${i !== 0 ? "border-t border-light-border dark:border-dak-border" : ""}`}
                 >
                   <div className="flex w-[300px] shrink-0 items-center gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-auth-navy/15 dark:bg-dak-cta/20">
-                      <Image
-                        src="/icons/user-rounded-small.svg"
-                        alt=""
-                        width={20}
-                        height={20}
-                        className="invert dark:invert-0"
-                      />
+                    <div className="relative size-10 shrink-0 overflow-hidden rounded-full">
+                      <Image src={member.avatar} alt="" fill className="object-cover" />
                     </div>
                     <div className="flex min-w-0 flex-col">
                       <span className="truncate text-sm font-medium text-auth-navy dark:text-dak-heading">{member.name}</span>

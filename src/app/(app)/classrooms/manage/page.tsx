@@ -7,6 +7,7 @@ const classrooms = Array.from({ length: 8 }).map((_, i) => ({
   subtitle: "Master Tile. Inc",
   modules: "4modules",
   tag: "50+ Enrolled",
+  imageSrc: "/illustrations/classroom-thumb-engineers.jpg",
 }));
 
 export default function ManageClassroomsPage() {

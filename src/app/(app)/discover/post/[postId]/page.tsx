@@ -42,8 +42,8 @@ export default function PostDetailPage() {
 
       <div className="flex flex-col gap-6 lg:flex-row">
         <div className="flex flex-col lg:flex-[2]">
-          <div className="flex h-[380px] items-center justify-center rounded-t-md border border-b-0 border-light-border bg-[#c2c2c2] dark:border-dak-border dark:bg-dak-bg">
-            <Image src="/illustrations/auth-placeholder.svg" alt="" width={73} height={73} />
+          <div className="relative h-[380px] w-full overflow-hidden rounded-t-md border border-b-0 border-light-border dark:border-dak-border">
+            <Image src="/illustrations/canvas-thumb-mortar-pattern.jpg" alt="" fill className="object-cover" />
           </div>
           <div className="flex gap-6 rounded-b-md border border-t-0 border-light-border bg-white px-4 py-3 text-sm font-medium text-auth-navy dark:border-dak-border dark:bg-dak-surface dark:text-dak-heading">
             <span className="flex items-center gap-1.5">♡ 248 Likes</span>
@@ -57,8 +57,8 @@ export default function PostDetailPage() {
               Author
             </h3>
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-full bg-auth-navy/15 dark:bg-dak-cta/20">
-                <Image src="/icons/user-rounded-small.svg" alt="" width={20} height={20} />
+              <div className="relative size-10 shrink-0 overflow-hidden rounded-full">
+                <Image src="/avatars/avatar-1.jpg" alt="" fill className="object-cover" />
               </div>
               <div className="flex flex-col">
                 <span className="text-base font-semibold text-auth-navy dark:text-dak-heading">Mark Williams</span>

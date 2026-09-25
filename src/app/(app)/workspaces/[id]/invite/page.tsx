@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 const members = [
-  { name: "Alex Morgan", email: "alex.morgan@example.com", role: "Collaborator", editable: true },
-  { name: "Sarah Lewis", email: "sarah.lewis@example.com", role: "Viewer", editable: true },
-  { name: "John Smith", email: "You", role: "Admin", editable: false },
+  { name: "Alex Morgan", email: "alex.morgan@example.com", role: "Collaborator", editable: true, avatar: "/avatars/avatar-1.jpg" },
+  { name: "Sarah Lewis", email: "sarah.lewis@example.com", role: "Viewer", editable: true, avatar: "/avatars/avatar-3.jpg" },
+  { name: "John Smith", email: "You", role: "Admin", editable: false, avatar: "/avatars/avatar-1.jpg" },
 ];
 
 const roleDefinitions = [
@@ -74,14 +74,8 @@ export default async function InviteTeamMembersPage({
                   key={member.name}
                   className={`flex items-center gap-3 p-4 ${i !== 0 ? "border-t border-light-border dark:border-dak-border" : ""}`}
                 >
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-auth-navy/15 dark:bg-dak-cta/20">
-                    <Image
-                      src="/icons/user-rounded-small.svg"
-                      alt=""
-                      width={20}
-                      height={20}
-                      className="invert dark:invert-0"
-                    />
+                  <div className="relative size-10 shrink-0 overflow-hidden rounded-full">
+                    <Image src={member.avatar} alt="" fill className="object-cover" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-sm font-medium text-auth-navy dark:text-dak-heading">{member.name}</span>

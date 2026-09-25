@@ -8,6 +8,7 @@ const canvases = Array.from({ length: 8 }).map((_, i) => ({
   meta: "Lorem Ipsum Workspace",
   metaSecondary: "Edited 12min ago . 4 Products",
   collaboratorCount: 3,
+  imageSrc: i % 2 === 0 ? "/illustrations/canvas-thumb-mortar-pattern.jpg" : "/illustrations/canvas-thumb-moodboard.png",
 }));
 
 export default function WorkspaceCanvasesPage() {

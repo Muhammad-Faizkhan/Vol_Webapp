@@ -4,14 +4,15 @@ type Member = {
   name: string;
   role: string;
   badge: "Admin" | "Collaborator" | "Viewer";
+  avatar: string;
 };
 
 const members: Member[] = [
-  { name: "Alex Morgan", role: "You", badge: "Admin" },
-  { name: "John Smith", role: "Contractor", badge: "Collaborator" },
-  { name: "Sarah Lewis", role: "Contractor", badge: "Collaborator" },
-  { name: "Sarah Williams", role: "Student", badge: "Viewer" },
-  { name: "Mark Williams", role: "Customer", badge: "Viewer" },
+  { name: "Alex Morgan", role: "You", badge: "Admin", avatar: "/avatars/avatar-1.jpg" },
+  { name: "John Smith", role: "Contractor", badge: "Collaborator", avatar: "/avatars/avatar-2.jpg" },
+  { name: "Sarah Lewis", role: "Contractor", badge: "Collaborator", avatar: "/avatars/avatar-3.jpg" },
+  { name: "Sarah Williams", role: "Student", badge: "Viewer", avatar: "/avatars/avatar-2.jpg" },
+  { name: "Mark Williams", role: "Customer", badge: "Viewer", avatar: "/avatars/avatar-1.jpg" },
 ];
 
 export function MembersPanel({ showManageRoles = true }: { showManageRoles?: boolean }) {
@@ -26,14 +27,8 @@ export function MembersPanel({ showManageRoles = true }: { showManageRoles?: boo
             key={member.name + i}
             className={`flex items-center gap-3 p-4 ${i !== 0 ? "border-t border-light-border dark:border-dak-border" : ""}`}
           >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-auth-navy/15 dark:bg-dak-cta/20">
-              <Image
-                src="/icons/user-rounded-small.svg"
-                alt=""
-                width={20}
-                height={20}
-                className="invert dark:invert-0"
-              />
+            <div className="relative size-10 shrink-0 overflow-hidden rounded-full">
+              <Image src={member.avatar} alt="" fill className="object-cover" />
             </div>
             <div className="flex flex-1 flex-col">
               <span className="text-sm font-medium text-auth-navy dark:text-dak-heading">{member.name}</span>
