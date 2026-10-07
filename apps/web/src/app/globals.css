@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@vol/ui/tokens.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -12,14 +13,7 @@
   --auth-bg2: #fafafa;
   --auth-checkbox: #48576e;
 
-  --dak-bg: #050505;
-  --dak-heading: #f4f4f6;
-  --dak-body: #c8cbd0;
-  --dak-cta: #9436fb;
-  --dak-muted: #777a82;
-  --dak-line: #c793ff;
-  --dak-surface: #121212;
-  --dak-border: #2b2b31;
+  /* --dak-* brand tokens live in packages/ui/src/tokens.css */
 
   /* Light dashboard theme (purple-on-white), verified against the real Figma Home screen */
   --app-bg: #fbf8ff;
@@ -51,14 +45,6 @@
   --color-auth-navy: var(--auth-navy);
   --color-auth-bg2: var(--auth-bg2);
   --color-auth-checkbox: var(--auth-checkbox);
-  --color-dak-bg: var(--dak-bg);
-  --color-dak-heading: var(--dak-heading);
-  --color-dak-body: var(--dak-body);
-  --color-dak-cta: var(--dak-cta);
-  --color-dak-muted: var(--dak-muted);
-  --color-dak-line: var(--dak-line);
-  --color-dak-surface: var(--dak-surface);
-  --color-dak-border: var(--dak-border);
   --color-app-bg: var(--app-bg);
   --color-app-sidebar-active: var(--app-sidebar-active);
   --color-app-badge: var(--app-badge);
