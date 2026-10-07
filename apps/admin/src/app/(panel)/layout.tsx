@@ -22,7 +22,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
         }}
       />
       <TopNav onMenuClick={() => setSidebarOpen(true)} />
-      <main className="min-w-0 px-4 pb-10 pt-24 sm:px-6 lg:ml-[var(--adm-sidebar-w)] lg:pl-12 lg:pr-[47px] lg:pt-[140px]">
+      <main className="min-w-0 px-4 pb-10 pt-24 sm:px-6 lg:ml-[var(--adm-sidebar-w)] lg:pl-[50px] lg:pr-[51px] lg:pt-[140px]">
         {children}
       </main>
       {signOutOpen && <SignOutModal onClose={() => setSignOutOpen(false)} onConfirm={() => router.push("/login")} />}

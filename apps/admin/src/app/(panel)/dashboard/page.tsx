@@ -35,31 +35,33 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-x-[19px] gap-y-4">
+      <div className="grid grid-cols-1 gap-x-[19px] gap-y-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {dashboardStats.map((stat) => (
           <StatCard key={stat.label} stat={stat} />
         ))}
       </div>
 
-      <div className="grid gap-6 2xl:grid-cols-[800fr_590fr]">
+      <div className="grid gap-6 xl:grid-cols-[800fr_590fr]">
         <Widget title="User Growth" period="Yearly">
           <GrowthChart
             data={userGrowthYearly}
+            defaultIndex={7}
             series={[
-              { key: "total", label: "Total User", color: "#4285f4" },
-              { key: "active", label: "Active User", color: "#9436fb", dashed: true },
+              { key: "total", label: "Total User", color: "#9436fb", stroke: "progress" },
+              { key: "active", label: "Active User", color: "#4285f4" },
             ]}
           />
         </Widget>
         <Widget title="Business Growth" period="Monthly">
           <GrowthChart
             data={businessGrowthMonthly}
-            series={[{ key: "business", label: "Business", color: "#9436fb", accent: "#23c54e", dashed: true }]}
+            defaultIndex={5}
+            series={[{ key: "business", label: "Business", color: "#9436fb", accent: "#23c54e", stroke: "dashed" }]}
           />
         </Widget>
       </div>
 
-      <div className="grid gap-6 2xl:grid-cols-[800fr_590fr]">
+      <div className="grid gap-6 xl:grid-cols-[800fr_590fr]">
         <Widget title="Workspace, canvas, classroom & catalog activity" period="Monthly">
           <ActivityChart data={activityByWeek} />
         </Widget>

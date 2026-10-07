@@ -23,7 +23,7 @@ export default function AnalyticsPage() {
     <div className="flex flex-col gap-6">
       <PageHeader title="Analytics" subtitle="Aggregate performance — growth, engagement, content and safety." />
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-x-[19px] gap-y-4">
+      <div className="grid grid-cols-1 gap-x-[19px] gap-y-4 sm:grid-cols-2 xl:grid-cols-4">
         {analyticsStats.map((stat) => (
           <StatCard key={stat.label} stat={stat} />
         ))}
@@ -36,9 +36,10 @@ export default function AnalyticsPage() {
           <Widget title="User & business growth" subtitle="Cumulative accounts and monthly active users" period="Yearly">
             <GrowthChart
               data={userGrowthYearly}
+              defaultIndex={7}
               series={[
-                { key: "total", label: "Total User", color: "#4285f4" },
-                { key: "active", label: "Active User", color: "#9436fb" },
+                { key: "total", label: "Total User", color: "#9436fb", stroke: "progress" },
+                { key: "active", label: "Active User", color: "#4285f4" },
               ]}
             />
           </Widget>

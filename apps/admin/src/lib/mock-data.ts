@@ -25,30 +25,33 @@ export const dashboardStats: Stat[] = [
   { label: "Banned Users", value: "431", delta: "+64 this week", tone: "down", icon: "/icons/stats/banned.svg" },
 ];
 
+// Curves traced from the Figma chart vectors (705:3181) so the shapes match the design.
 export const userGrowthYearly = [
-  { label: "Jan", total: 1200, active: 900 },
-  { label: "Feb", total: 2600, active: 1500 },
-  { label: "Mar", total: 5200, active: 2600 },
-  { label: "Apr", total: 9000, active: 4200 },
-  { label: "May", total: 22000, active: 9000 },
-  { label: "Jun", total: 13000, active: 6500 },
-  { label: "July", total: 20000, active: 4000 },
-  { label: "Aug", total: 5400, active: 1400 },
-  { label: "Sep", total: 26000, active: 3500 },
-  { label: "Oct", total: 32000, active: 9000 },
-  { label: "Nov", total: 45000, active: 22000 },
-  { label: "Dec", total: 100000, active: 50000 },
+  { label: "Jan", total: 7000, active: 4800 },
+  { label: "Feb", total: 11800, active: 6300 },
+  { label: "Mar", total: 17400, active: 9500 },
+  { label: "Apr", total: 30400, active: 15800 },
+  { label: "May", total: 44400, active: 19800 },
+  { label: "Jun", total: 59600, active: 26800 },
+  { label: "July", total: 42400, active: 12100 },
+  { label: "Aug", total: 29000, active: 6500 },
+  { label: "Sep", total: 39800, active: 9200 },
+  { label: "Oct", total: 49200, active: 15000 },
+  { label: "Nov", total: 60000, active: 27100 },
+  { label: "Dec", total: 83800, active: 37600 },
+  // Figma draws the area past Dec to the plot edge; this unlabeled point reproduces that.
+  { label: "", total: 100000, active: 45000 },
 ];
 
 export const businessGrowthMonthly = [
-  { label: "Jan", business: 300 },
-  { label: "Feb", business: 650 },
-  { label: "Mar", business: 1100 },
-  { label: "Apr", business: 2600 },
-  { label: "May", business: 9000 },
-  { label: "Jun", business: 1540 },
-  { label: "Jul", business: 5200 },
-  { label: "Aug", business: 7500 },
+  { label: "Jan", business: 10100 },
+  { label: "Feb", business: 16500 },
+  { label: "Mar", business: 33700 },
+  { label: "Apr", business: 53000 },
+  { label: "May", business: 47600 },
+  { label: "Jun", business: 35600 },
+  { label: "Jul", business: 51100 },
+  { label: "Aug", business: 68500 },
   { label: "Sep", business: 100000 },
 ];
 

@@ -40,13 +40,14 @@ export function Sidebar({ open, onClose, onLogout }: SidebarProps) {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex shrink-0 justify-center px-6 pt-[clamp(1rem,7.4dvh,5rem)] lg:px-10">
+        {/* Figma: logo frame 80px from the top, 142px tall (90×136 logo), then 30px to the first link. */}
+        <div className="flex h-[clamp(84px,13.15dvh,142px)] shrink-0 items-center justify-center px-6 mt-[clamp(1rem,7.4dvh,5rem)] lg:px-10">
           <div className="relative h-[clamp(72px,12.6dvh,136px)] w-[clamp(48px,8.3dvh,90px)]">
             <Image src="/brand/admin-logo.png" alt="VÔL" fill sizes="90px" className="object-cover" priority />
           </div>
         </div>
 
-        <nav className="mt-[clamp(1rem,4dvh,2.75rem)] flex flex-1 flex-col gap-[clamp(0.25rem,2.2dvh,1.5rem)] overflow-y-auto px-4 lg:px-10">
+        <nav className="mt-[clamp(0.75rem,2.78dvh,1.875rem)] flex flex-1 flex-col gap-[clamp(0.25rem,2.2dvh,1.5rem)] overflow-y-auto px-4 lg:px-[clamp(16px,calc(3.61vw-29.3px),40px)]">
           {navItems.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
@@ -55,10 +56,10 @@ export function Sidebar({ open, onClose, onLogout }: SidebarProps) {
                 href={item.href}
                 onClick={onClose}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-[clamp(44px,5.2dvh,56px)] shrink-0 items-center gap-3 rounded-lg border px-4 text-white transition-colors ${
+                className={`flex shrink-0 items-center gap-3 rounded-lg border px-4 text-white transition-colors ${
                   active
-                    ? "border-dak-cta bg-[linear-gradient(102.88deg,#9436fb_0.57%,#582095_100%)]"
-                    : "border-transparent hover:bg-white/5"
+                    ? "min-h-[clamp(44px,5.2dvh,56px)] border-dak-cta bg-[linear-gradient(102.88deg,#9436fb_0.57%,#582095_100%)]"
+                    : "min-h-[clamp(40px,4.45dvh,48px)] border-transparent hover:bg-white/5"
                 }`}
               >
                 <Image src={`/icons/nav/${item.icon}.svg`} alt="" width={24} height={24} className="shrink-0" />
@@ -70,7 +71,7 @@ export function Sidebar({ open, onClose, onLogout }: SidebarProps) {
           })}
         </nav>
 
-        <div className="shrink-0 px-4 pb-[clamp(1rem,4.6dvh,3.125rem)] pt-4 lg:px-10">
+        <div className="shrink-0 px-4 pb-[clamp(1rem,4.6dvh,3.125rem)] pt-4 lg:px-[clamp(16px,calc(3.61vw-29.3px),40px)]">
           <button
             type="button"
             onClick={onLogout}

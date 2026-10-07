@@ -36,13 +36,13 @@ export function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
             type="search"
             name="q"
             placeholder="Search users, businesses.."
-            className="h-[43px] w-full rounded-xl border-[0.5px] border-adm-input-border bg-transparent pl-[40.5px] pr-4 text-base text-dak-heading placeholder:text-adm-placeholder focus:border-dak-cta focus:outline-none"
+            className="h-[41px] w-full rounded-xl border-[0.5px] border-adm-input-border bg-transparent pl-[40.5px] pr-4 text-base text-dak-heading placeholder:text-adm-placeholder focus:border-dak-cta focus:outline-none"
           />
         </form>
       </div>
 
       <div className="flex shrink-0 items-center gap-4">
-        <button type="button" aria-label="Notifications" className="flex size-11 items-center justify-center rounded-xl">
+        <button type="button" aria-label="Notifications" className="flex h-6 items-center justify-center rounded-xl p-1">
           <Image src="/icons/bell.svg" alt="" width={16} height={20} />
         </button>
         <div className="relative size-[42px] overflow-hidden rounded-full">
