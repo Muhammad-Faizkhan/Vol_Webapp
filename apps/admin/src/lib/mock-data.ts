@@ -125,3 +125,74 @@ export const userClassrooms = [
   { name: "Abc Classroom", role: "Student", progress: "43%", status: "Active" },
   { name: "Abc Classroom", role: "Student", progress: "43%", status: "Active" },
 ];
+
+export type CaseStatus = "Open" | "In review";
+
+export type AdminCase = {
+  id: string;
+  title: string;
+  reporter: string;
+  opened: string;
+  status: CaseStatus;
+  reportedAccount: string;
+  violation: string;
+  // Figma 799:9198 shows these two values as written; kept verbatim until real case data exists.
+  escalatedBy: string;
+  openedLocation: string;
+  recommendation: string;
+  evidence: string[];
+};
+
+const harassment = {
+  title: "Repeated harassment in Workspace comments",
+  reporter: "John smith",
+  opened: "2026-09-15",
+  reportedAccount: "Mark Williams",
+  violation: "Harassment",
+  escalatedBy: "2026-09-15",
+  openedLocation: "New York",
+  recommendation: "Permanent ban recommended",
+  evidence: ["3 comment threads", "2 direct messages", "Canvas annotation log"],
+};
+
+export const cases: AdminCase[] = [
+  { ...harassment, id: "ESC-0001", status: "Open" },
+  { ...harassment, id: "ESC-0003", status: "Open" },
+  {
+    ...harassment,
+    id: "ESC-0002",
+    title: "Counterfeit product listings in catalog",
+    status: "In review",
+    violation: "Counterfeit goods",
+    recommendation: "Catalog takedown recommended",
+    evidence: ["4 product listings", "Trademark complaint", "Seller message history"],
+  },
+  { ...harassment, id: "ESC-0004", status: "Open" },
+];
+
+export const caseStats = [
+  { label: "Open escalations", value: "02" },
+  { label: "In review", value: "02" },
+  { label: "Reopened this month", value: "03" },
+];
+
+export function getCase(id: string) {
+  return cases.find((c) => c.id.toLowerCase() === id.toLowerCase());
+}
+
+export const analyticsStats: Stat[] = [
+  { label: "Total Users", value: "14,803", delta: "+8.7% Increases", tone: "up", icon: "/icons/nav/users.svg" },
+  { label: "Active workspaces", value: "9,431", delta: "+7.7%", tone: "up", icon: "/icons/stats/workspaces.svg" },
+  { label: "Classrooms running", value: "4,803", delta: "+8.7% Increases", tone: "up", icon: "/icons/stats/classrooms.svg" },
+  { label: "Total products", value: "1,431", delta: "+7.7%", tone: "up", icon: "/icons/stats/products.svg" },
+];
+
+export const accountShare = [
+  { name: "Individual Users", value: 4500, color: "#4285f4" },
+  { name: "Distributor", value: 760, color: "#fbbc05" },
+  { name: "Contractor", value: 520, color: "#3bcc92" },
+];
+
+// Placeholder copy from Figma 792:7285 / 792:7364 until the real legal text is supplied.
+export const policyPlaceholder =
+  "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets. It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised thanks to these sheets and more recently with desktop publishing software like Aldus PageMaker and Microsoft Word including versions of Lorem Ipsum. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of \"de Finibus Bonorum et Malorum\" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, \"Lorem ipsum dolor sit amet..\", comes from a line in section 1.10.32.";

@@ -35,7 +35,7 @@ export default function DashboardPage() {
         }
       />
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-x-[19px] gap-y-4">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-x-[19px] gap-y-4">
         {dashboardStats.map((stat) => (
           <StatCard key={stat.label} stat={stat} />
         ))}

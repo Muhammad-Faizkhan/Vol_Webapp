@@ -4,10 +4,12 @@ import type { ReactNode } from "react";
 export function DetailCard({
   title,
   children,
+  footer,
   className = "",
 }: {
   title: string;
   children: ReactNode;
+  footer?: ReactNode;
   className?: string;
 }) {
   return (
@@ -16,16 +18,18 @@ export function DetailCard({
     >
       <h2 className="font-heading text-sm font-medium uppercase leading-4 tracking-[1.4px] text-dak-heading">{title}</h2>
       <div className="flex flex-col gap-2 border-t border-dak-border/40 pt-[18px]">{children}</div>
+      {footer}
     </section>
   );
 }
 
-// One label/value line inside a DetailCard.
-export function DetailRow({ label, children }: { label: string; children: ReactNode }) {
+// One label/value line inside a DetailCard. Without a value the label renders as the line's
+// content (Figma's evidence list).
+export function DetailRow({ label, children }: { label: string; children?: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-dak-border/40 pb-4 text-sm leading-5 last:border-b-0">
-      <span className="text-dak-body">{label}</span>
-      <span className="text-right font-medium text-dak-heading">{children}</span>
+    <div className="flex items-center justify-between gap-4 border-b border-dak-border/40 pb-4 text-sm leading-5">
+      <span className={children === undefined ? "font-medium text-dak-heading" : "text-dak-body"}>{label}</span>
+      {children !== undefined && <span className="text-right font-medium text-dak-heading">{children}</span>}
     </div>
   );
 }

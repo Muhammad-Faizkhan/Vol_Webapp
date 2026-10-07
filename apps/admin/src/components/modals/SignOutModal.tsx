@@ -19,13 +19,9 @@ export function SignOutModal({ onConfirm, onClose }: { onConfirm: () => void; on
         onClick={(e) => e.stopPropagation()}
         className="relative mt-[50px] flex w-full max-w-[325px] flex-col items-center gap-5 rounded-[30px] bg-[#4d4955] px-[30px] pb-[30px] backdrop-blur-[10px]"
       >
-        <Image
-          src="/illustrations/signout-glow.svg"
-          alt=""
-          width={325}
-          height={256}
-          className="pointer-events-none absolute bottom-0 left-0 h-full w-full rounded-[30px]"
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[30px]">
+          <Image src="/illustrations/signout-glow.svg" alt="" fill className="object-cover" />
+        </div>
         <div className="relative -mt-[50px] flex size-[100px] items-center justify-center rounded-full bg-dak-surface pl-2.5 pr-[15px]">
           <Image src="/icons/logout-lg.svg" alt="" width={46} height={46} />
         </div>
