@@ -56,13 +56,13 @@ export function WorkspaceCard({
         </span>
       </div>
       <div className="flex flex-col gap-2 p-4">
-        <h4 className="text-base font-medium tracking-[0.28px] text-auth-navy dark:text-dak-heading">
+        <h4 className="text-base font-medium leading-4 tracking-[0.28px] text-[#020204] dark:text-dak-heading">
           {title}
         </h4>
         {variant === "wide" ? (
           <>
-            <p className="text-sm text-[#929292] dark:text-dak-muted">{workspace}</p>
-            <p className="text-sm text-[#929292] dark:text-dak-muted">{editedAgo}</p>
+            <p className="text-sm leading-4 tracking-[0.28px] text-[#2b2b31] dark:text-dak-body">{workspace}</p>
+            <p className="text-sm leading-5 text-[#45464d] dark:text-dak-muted">{editedAgo}</p>
           </>
         ) : (
           <>
@@ -72,7 +72,7 @@ export function WorkspaceCard({
         )}
       </div>
       {showFooter && (
-        <div className="flex items-center gap-2 border-t border-[#c793ff] px-4 pt-[13px] dark:border-dak-border">
+        <div className="flex items-center gap-2 border-t border-[#c793ff] px-4 pb-[14px] pt-[13px] dark:border-dak-border">
           <div className="flex items-center">
             {collaboratorAvatars.length > 0
               ? collaboratorAvatars.map((avatar, i) => (
@@ -97,7 +97,7 @@ export function WorkspaceCard({
                   </span>
                 ))}
           </div>
-          <span className="pl-2 text-base text-auth-navy dark:text-dak-heading">
+          <span className="pl-2 text-base text-[#2b2b31] dark:text-dak-heading">
             +{collaboratorCount} Collabs
           </span>
         </div>

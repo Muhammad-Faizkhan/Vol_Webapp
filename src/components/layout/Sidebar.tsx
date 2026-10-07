@@ -44,7 +44,7 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
     { href: "/workspaces", label: "Workspaces", icon: "workspaces" },
     { href: "/explore", label: "Explore", icon: "explore" },
     { href: "/classrooms", label: "Classrooms", icon: "classrooms" },
-    { href: "/business/dashboard", label: "Products", icon: "products" },
+    { href: "/products", label: "Products", icon: "products" },
     { href: "/profile", label: "Profile", icon: "profile" },
   ];
 
