@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="325" height="256" viewBox="0 0 325 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 1000004916">
+<g clip-path="url(#clip0_0_9)">
+<g id="Ellipse 9" filter="url(#filter0_f_0_9)">
+<circle cx="70.5" cy="193.5" r="110.5" fill="#C793FF" fill-opacity="0.4"/>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_0_9" x="-190" y="-67" width="521" height="521" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="75" result="effect1_foregroundBlur_0_9"/>
+</filter>
+<clipPath id="clip0_0_9">
+<rect width="325" height="256" rx="30" fill="white"/>
+</clipPath>
+</defs>
+</svg>

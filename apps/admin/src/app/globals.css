@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "@vol/ui/tokens.css";
+
+/* The admin panel is dark-only (every Figma "Admin Panel" frame is the dark theme), so these
+   tokens have no light counterparts. Shared brand colors (dak-*) come from @vol/ui. */
+:root {
+  --adm-sidebar: #0f090c;
+  --adm-sidebar-line: #c793ff;
+  --adm-logout: #1d1d20;
+  --adm-logout-border: #b86e9f;
+  --adm-input-border: #636365;
+  --adm-placeholder: #cecece;
+  --adm-tooltip: #2b2b2b;
+  --adm-tooltip-border: #b4b4b4;
+  --adm-success: #23c54e;
+  --adm-warning: #fbbc05;
+  --adm-danger: #e5252e;
+  --adm-danger-text: #c5221f;
+  --adm-danger-dark: #a5121a;
+  --adm-chip-border: #d9d9d9;
+  --adm-blue: #4285f4;
+
+  /* Figma's canvas is 1920px with a 400px sidebar (~20.8333% of width). Scale the sidebar with
+     the viewport below 1920px and cap it at 400px above, same approach as apps/web. */
+  --adm-sidebar-w: clamp(260px, 20.8333vw, 400px);
+}
+
+@theme inline {
+  --color-adm-sidebar: var(--adm-sidebar);
+  --color-adm-sidebar-line: var(--adm-sidebar-line);
+  --color-adm-logout: var(--adm-logout);
+  --color-adm-logout-border: var(--adm-logout-border);
+  --color-adm-input-border: var(--adm-input-border);
+  --color-adm-placeholder: var(--adm-placeholder);
+  --color-adm-tooltip: var(--adm-tooltip);
+  --color-adm-tooltip-border: var(--adm-tooltip-border);
+  --color-adm-success: var(--adm-success);
+  --color-adm-warning: var(--adm-warning);
+  --color-adm-danger: var(--adm-danger);
+  --color-adm-danger-text: var(--adm-danger-text);
+  --color-adm-danger-dark: var(--adm-danger-dark);
+  --color-adm-chip-border: var(--adm-chip-border);
+  --color-adm-blue: var(--adm-blue);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-geist);
+  --font-urbanist: var(--font-urbanist-family);
+}
+
+body {
+  background: var(--dak-bg);
+  color: var(--dak-heading);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
