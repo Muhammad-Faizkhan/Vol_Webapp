@@ -48,7 +48,10 @@ function exportCsv(rows: AdminUser[]) {
   URL.revokeObjectURL(url);
 }
 
-const columns = "grid-cols-[minmax(230px,2.4fr)_minmax(90px,1fr)_minmax(90px,1fr)_minmax(130px,1.2fr)_minmax(70px,0.8fr)_minmax(90px,1fr)_118px]";
+// Column widths measured from Figma 743:251 (341/186/176/191/142/192px of the 1338px row, plus the
+// 110px action button), kept proportional so the table fits laptop widths without scrolling.
+const columns =
+  "grid-cols-[minmax(264px,341fr)_minmax(84px,186fr)_minmax(76px,176fr)_minmax(116px,191fr)_minmax(56px,142fr)_minmax(76px,192fr)_110px]";
 
 export function UsersTable({ initialQuery }: { initialQuery: string }) {
   const [query, setQuery] = useState(initialQuery);
@@ -77,7 +80,7 @@ export function UsersTable({ initialQuery }: { initialQuery: string }) {
           <button
             type="button"
             onClick={() => exportCsv(filtered)}
-            className="flex h-12 items-center gap-1 rounded-[28px] bg-dak-cta px-4 text-base font-bold tracking-[-0.32px] text-dak-heading"
+            className="flex h-12 w-[123px] items-center justify-center gap-1 rounded-[28px] bg-dak-cta px-4 text-base font-bold tracking-[-0.32px] text-dak-heading"
           >
             <Image src="/icons/export.svg" alt="" width={24} height={24} />
             Export
@@ -109,32 +112,32 @@ export function UsersTable({ initialQuery }: { initialQuery: string }) {
       </div>
 
       <section className="flex flex-col gap-8 rounded-2xl border border-dak-border bg-dak-surface p-[clamp(16px,2.1vw,40px)]">
-        <div className="overflow-x-auto">
-          <div className="min-w-[960px]">
-            <div className={`grid ${columns} items-center gap-4 border-b border-dak-muted/50 pb-5 text-sm font-medium leading-4 tracking-[0.28px] text-dak-body`}>
+        <div className="overflow-x-auto [scrollbar-width:thin]">
+          <div className="min-w-[784px]">
+            <div className={`grid ${columns} items-center border-b border-dak-muted/50 pb-[23px] text-sm font-medium leading-4 tracking-[0.28px] text-dak-body`}>
               <span>User</span>
               <span>User ID</span>
               <span>Type</span>
               <span>Status</span>
               <span>Reports</span>
               <span>Last Active</span>
-              <span className="text-center">Action</span>
+              <span>Action</span>
             </div>
 
             {rows.length === 0 ? (
               <p className="py-12 text-center text-base text-dak-body">No users match these filters.</p>
             ) : (
-              <ul className="flex flex-col gap-[17px] pt-[26px]">
+              <ul className="flex flex-col gap-[27px] pt-[32px]">
                 {rows.map((u) => (
-                  <li key={u.id} className={`grid ${columns} items-center gap-4 text-sm font-medium leading-4 tracking-[0.28px] text-dak-body`}>
-                    <div className="flex min-w-0 items-center gap-[11px]">
+                  <li key={u.id} className={`grid ${columns} items-center text-sm font-medium leading-4 tracking-[0.28px] text-dak-body`}>
+                    <div className="flex min-w-0 items-center gap-[11px] pr-3">
                       <Image src={u.avatar} alt="" width={40} height={40} className="size-10 shrink-0 rounded-full" />
                       <div className="flex min-w-0 flex-col gap-2">
                         <p className="truncate text-lg font-semibold leading-normal tracking-[-0.2px] text-dak-heading">{u.name}</p>
                         <p className="truncate">{u.email}</p>
                       </div>
                     </div>
-                    <span className="truncate">{u.id}</span>
+                    <span className="truncate pr-3">{u.id}</span>
                     <span>{u.type}</span>
                     <span>
                       <StatusBadge label={u.status} tone={accountStatusTone(u.status)} />
@@ -143,7 +146,7 @@ export function UsersTable({ initialQuery }: { initialQuery: string }) {
                     <span className="whitespace-nowrap">{u.lastActive}</span>
                     <Link
                       href={`/users/${u.id}`}
-                      className="flex h-10 items-center justify-center rounded-3xl bg-dak-cta px-2 text-sm font-medium tracking-[0.28px] text-dak-heading"
+                      className="flex h-10 w-[110px] items-center justify-center rounded-3xl bg-dak-cta px-2 text-sm font-medium tracking-[0.28px] text-dak-heading"
                     >
                       See Details
                     </Link>

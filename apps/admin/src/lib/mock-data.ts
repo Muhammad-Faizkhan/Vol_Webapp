@@ -107,6 +107,11 @@ export const users: AdminUser[] = [
   { ...baseUser, id: "USR-10246", name: "Alex Morgan", email: "Alexmorgan@domain.com", username: "@alexmorgan3", avatar: "/avatars/alex-morgan.png", type: "Individual", status: "Active" },
 ];
 
+// A second page of mock accounts so Previous/Next pagination works like the Figma table.
+users.push(
+  ...users.map((u, i) => ({ ...u, id: `USR-${10247 + i}`, username: `${u.username}-2`, lastActive: "1h ago" })),
+);
+
 export const totalUsers = "15,620";
 
 export function getUser(id: string) {

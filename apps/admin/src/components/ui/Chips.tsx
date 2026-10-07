@@ -4,9 +4,11 @@ import Link from "next/link";
 
 type ChipItem = { value: string; label: string; href?: string };
 
-const base = "flex h-12 shrink-0 items-center justify-center rounded-2xl p-2.5 text-base whitespace-nowrap transition-colors";
-const activeCls = "min-w-[110px] bg-dak-cta font-semibold text-white";
-const idleCls = "min-w-[110px] border border-adm-chip-border text-white/60 hover:text-white sm:min-w-[150px]";
+const base = "flex h-12 shrink-0 items-center justify-center rounded-2xl px-4 py-2.5 text-base whitespace-nowrap transition-colors";
+// Figma pills are 110px (active) and 150px (idle) at 1920; they scale down with the viewport and
+// wrap rather than scroll when a row still doesn't fit.
+const activeCls = "min-w-[clamp(80px,5.73vw,110px)] bg-dak-cta font-semibold text-white";
+const idleCls = "min-w-[clamp(80px,7.8vw,150px)] border border-adm-chip-border text-white/60 hover:text-white";
 
 // The pill filter/tab row used across the admin screens (user filters, user-detail tabs, settings
 // tabs). Items with an href render as links so tabs stay URL-addressable.
@@ -22,7 +24,7 @@ export function Chips({
   label: string;
 }) {
   return (
-    <div role="tablist" aria-label={label} className="flex gap-[17px] overflow-x-auto pb-1">
+    <div role="tablist" aria-label={label} className="flex flex-wrap gap-[17px]">
       {items.map((item) => {
         const active = item.value === value;
         const cls = `${base} ${active ? activeCls : idleCls}`;
