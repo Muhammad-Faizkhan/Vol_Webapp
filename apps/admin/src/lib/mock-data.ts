@@ -109,3 +109,19 @@ export const totalUsers = "15,620";
 export function getUser(id: string) {
   return users.find((u) => u.id === id);
 }
+
+export const userWorkspaces = [
+  { name: "Abc Workspace", role: "Viewer", members: "05", canvases: "18", visibility: "Private", updated: "4d ago" },
+  { name: "Abc Workspace", role: "Editor", members: "03", canvases: "7", visibility: "Private", updated: "4d ago" },
+  { name: "Abc Workspace", role: "Owner", members: "04", canvases: "05", visibility: "Public", updated: "4d ago" },
+  { name: "Abc Workspace", role: "Viewer", members: "06", canvases: "14", visibility: "Private", updated: "4d ago" },
+  { name: "Abc Workspace", role: "Viewer", members: "10", canvases: "8", visibility: "Public", updated: "4d ago" },
+];
+
+export const userClassrooms = [
+  { name: "Abc Classroom", role: "Student", progress: "43%", status: "Active" },
+  { name: "Abc Classroom", role: "Student", progress: "43%", status: "Active" },
+  { name: "Abc Classroom", role: "Student", progress: "43%", status: "Inactive" },
+  { name: "Abc Classroom", role: "Student", progress: "43%", status: "Active" },
+  { name: "Abc Classroom", role: "Student", progress: "43%", status: "Active" },
+];

@@ -3,7 +3,7 @@ const tones = {
   warning: "border-adm-warning bg-adm-warning/15 text-adm-warning",
   danger: "border-adm-danger bg-adm-danger/15 text-adm-danger",
   info: "border-adm-blue bg-adm-blue/15 text-adm-blue",
-  neutral: "border-dak-muted bg-dak-muted/15 text-dak-body",
+  neutral: "border-dak-muted bg-dak-muted/15 text-dak-muted",
 };
 
 export type BadgeTone = keyof typeof tones;
