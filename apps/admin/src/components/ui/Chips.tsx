@@ -7,8 +7,8 @@ type ChipItem = { value: string; label: string; href?: string };
 const base = "flex h-12 shrink-0 items-center justify-center rounded-2xl px-4 py-2.5 text-base whitespace-nowrap transition-colors";
 // Figma pills are 110px (active) and 150px (idle) at 1920; they scale down with the viewport and
 // wrap rather than scroll when a row still doesn't fit.
-const activeCls = "min-w-[clamp(80px,5.73vw,110px)] bg-dak-cta font-semibold text-white";
-const idleCls = "min-w-[clamp(80px,7.8vw,150px)] border border-adm-chip-border text-white/60 hover:text-white";
+const activeCls = "min-w-[clamp(80px,calc(5.73*var(--vw)),110px)] bg-dak-cta font-semibold text-white";
+const idleCls = "min-w-[clamp(80px,calc(7.8*var(--vw)),150px)] border border-adm-chip-border text-white/60 hover:text-white";
 
 // The pill filter/tab row used across the admin screens (user filters, user-detail tabs, settings
 // tabs). Items with an href render as links so tabs stay URL-addressable.

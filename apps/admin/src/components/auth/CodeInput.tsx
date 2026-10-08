@@ -49,9 +49,9 @@ export function CodeInput({ value, onChange }: { value: string; onChange: (value
   );
 
   return (
-    <div className="flex items-center justify-center gap-[clamp(6px,1.2vw,12px)]">
+    <div className="flex items-center justify-center gap-[clamp(6px,calc(1.2*var(--vw)),12px)]">
       {[0, 1, 2].map(box)}
-      <span className="w-[clamp(12px,2vw,40px)] text-center text-base font-bold leading-6 text-dak-heading">-</span>
+      <span className="w-[clamp(12px,calc(2*var(--vw)),40px)] text-center text-base font-bold leading-6 text-dak-heading">-</span>
       {[3, 4, 5].map(box)}
     </div>
   );

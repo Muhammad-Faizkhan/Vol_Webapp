@@ -20,9 +20,20 @@
   --adm-chip-border: #d9d9d9;
   --adm-blue: #4285f4;
 
+  /* --adm-zoom is set by the script in app/layout.tsx (viewport / 1920 on desktop, else 1).
+     Zoom also shrinks vw/dvh lengths, so use --vw / --vh instead of raw viewport units: they
+     undo the zoom and keep viewport-relative sizes from being scaled twice. */
+  --adm-zoom: 1;
+  --vw: calc(1vw / var(--adm-zoom));
+  --vh: calc(1dvh / var(--adm-zoom));
+
   /* Figma's canvas is 1920px with a 400px sidebar (~20.8333% of width). Scale the sidebar with
      the viewport below 1920px and cap it at 400px above, same approach as apps/web. */
-  --adm-sidebar-w: clamp(260px, 20.8333vw, 400px);
+  --adm-sidebar-w: clamp(260px, calc(20.8333 * var(--vw)), 400px);
+}
+
+html {
+  zoom: var(--adm-zoom);
 }
 
 @theme inline {

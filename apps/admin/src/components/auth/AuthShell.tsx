@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 // the VÔL hero image filling the left 868/1920 of the screen, and the form centered on the right.
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-[100dvh] w-full overflow-hidden bg-dak-bg">
+    <div className="relative flex min-h-[calc(100*var(--vh))] w-full overflow-hidden bg-dak-bg">
       <div className="pointer-events-none absolute inset-[-55.06%_-35.93%_-79.91%_-27.19%]">
         <Image src="/illustrations/swirl-bg.svg" alt="" fill className="object-fill" priority />
       </div>
@@ -26,11 +26,11 @@ export function AuthShell({ children }: { children: ReactNode }) {
 export function AuthHeading({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex w-full flex-col items-center gap-6">
-      <div className="relative h-[clamp(110px,14dvh,150px)] w-[clamp(73px,9.3dvh,100px)]">
+      <div className="relative h-[clamp(110px,calc(14*var(--vh)),150px)] w-[clamp(73px,calc(9.3*var(--vh)),100px)]">
         <Image src="/brand/admin-logo.png" alt="VÔL" fill sizes="100px" className="object-cover" priority />
       </div>
       <div className="flex w-full max-w-[498px] flex-col gap-4 px-2.5 text-center">
-        <h1 className="text-[clamp(26px,2.4vw,32px)] font-bold text-dak-heading">{title}</h1>
+        <h1 className="text-[clamp(26px,calc(2.4*var(--vw)),32px)] font-bold text-dak-heading">{title}</h1>
         <p className="text-base font-medium leading-[23px] text-dak-body">{children}</p>
       </div>
     </div>

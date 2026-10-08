@@ -34,7 +34,7 @@ export function Toast({
   return (
     <div
       role="status"
-      className={`fixed bottom-6 right-4 z-50 flex max-w-[calc(100vw-2rem)] items-center gap-[11px] rounded-2xl border p-6 sm:right-[50px] ${tones[tone]}`}
+      className={`fixed bottom-6 right-4 z-50 flex max-w-[calc(100*var(--vw)-2rem)] items-center gap-[11px] rounded-2xl border p-6 sm:right-[50px] ${tones[tone]}`}
     >
       <span className="size-6 shrink-0 bg-current [mask:url(/icons/check-circle.svg)_center/contain_no-repeat]" />
       <div className="flex min-w-0 flex-col gap-1">

@@ -25,7 +25,7 @@ const outcomes: Record<AccountAction, { status?: AccountStatus; toast: string; t
 
 function TableCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex w-full max-w-[815px] flex-col gap-8 rounded-2xl border border-dak-border bg-dak-surface px-[clamp(16px,2.1vw,40px)] pb-10 pt-6">
+    <section className="flex w-full max-w-[815px] flex-col gap-8 rounded-2xl border border-dak-border bg-dak-surface px-[clamp(16px,calc(2.1*var(--vw)),40px)] pb-10 pt-6">
       <h2 className="font-heading text-sm font-medium uppercase leading-4 tracking-[1.4px] text-dak-heading">{title}</h2>
       <div className="overflow-x-auto">{children}</div>
     </section>

@@ -98,7 +98,7 @@ export function UsersTable({ initialQuery }: { initialQuery: string }) {
           }}
           placeholder="Search by name, username, email or user ID"
           aria-label="Search users"
-          className="h-[43px] w-full max-w-[500px] rounded-xl border-[0.5px] border-adm-input-border bg-[#0b0f19] pl-[24.5px] pr-4 text-base text-dak-heading placeholder:text-adm-placeholder focus:border-dak-cta focus:outline-none"
+          className="h-10 w-full max-w-[500px] rounded-xl border-[0.5px] border-adm-input-border bg-[#0b0f19] pl-[24.5px] pr-4 text-base text-dak-heading placeholder:text-adm-placeholder focus:border-dak-cta focus:outline-none"
         />
         <Chips
           label="Filter users"
@@ -111,7 +111,7 @@ export function UsersTable({ initialQuery }: { initialQuery: string }) {
         />
       </div>
 
-      <section className="flex flex-col gap-8 rounded-2xl border border-dak-border bg-dak-surface p-[clamp(16px,2.1vw,40px)]">
+      <section className="flex flex-col gap-8 rounded-2xl border border-dak-border bg-dak-surface p-[clamp(16px,calc(2.1*var(--vw)),40px)]">
         <div className="overflow-x-auto [scrollbar-width:thin]">
           <div className="min-w-[784px]">
             <div className={`grid ${columns} items-center border-b border-dak-muted/50 pb-[23px] text-sm font-medium leading-4 tracking-[0.28px] text-dak-body`}>

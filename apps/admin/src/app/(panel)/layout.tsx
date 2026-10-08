@@ -12,7 +12,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   const [signOutOpen, setSignOutOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] w-full bg-dak-bg">
+    <div className="min-h-[calc(100*var(--vh))] w-full bg-dak-bg">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

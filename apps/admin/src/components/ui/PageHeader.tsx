@@ -17,7 +17,7 @@ export function PageHeader({
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="flex min-w-0 flex-col gap-1">
         {eyebrow && <p className="text-base leading-6 text-dak-body">{eyebrow}</p>}
-        <h1 className="text-[clamp(24px,2.4vw,32px)] font-bold leading-10 tracking-[-0.32px] text-dak-heading">{title}</h1>
+        <h1 className="text-[clamp(24px,calc(2.4*var(--vw)),32px)] font-bold leading-10 tracking-[-0.32px] text-dak-heading">{title}</h1>
         {subtitle && <p className="text-base leading-6 text-dak-body">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-4">{actions}</div>}

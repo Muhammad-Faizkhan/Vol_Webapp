@@ -48,7 +48,7 @@ export function ActionModal({
           e.preventDefault();
           if (canConfirm) onConfirm(reason.trim());
         }}
-        className="flex max-h-[90dvh] w-full max-w-[768px] flex-col overflow-hidden rounded-2xl border border-[#c6c6cd] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]"
+        className="flex max-h-[calc(90*var(--vh))] w-full max-w-[768px] flex-col overflow-hidden rounded-2xl border border-[#c6c6cd] shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1),0px_4px_6px_-4px_rgba(0,0,0,0.1)]"
       >
         <div className="flex items-center justify-between gap-4 bg-dak-border px-6 py-5">
           <div className="flex min-w-0 flex-col gap-1">

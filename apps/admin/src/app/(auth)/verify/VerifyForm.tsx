@@ -26,7 +26,7 @@ export function VerifyForm({ email }: { email: string }) {
             <Image src="/icons/mail-badge.png" alt="" width={40} height={40} />
           </div>
         </div>
-        <h2 className="pb-3 text-center text-[clamp(26px,2.4vw,32px)] font-semibold leading-10 tracking-[-0.32px] text-dak-heading">
+        <h2 className="pb-3 text-center text-[clamp(26px,calc(2.4*var(--vw)),32px)] font-semibold leading-10 tracking-[-0.32px] text-dak-heading">
           Check your inbox
         </h2>
         <p className="max-w-[428px] px-2 text-center text-base leading-6 text-dak-body">
