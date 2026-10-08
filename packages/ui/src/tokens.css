@@ -1,0 +1,24 @@
+/* VÔL brand tokens shared by apps/web and apps/admin. Each token needs both halves: the raw
+   --var under :root and its --color-* mapping under @theme inline, or the Tailwind class
+   (e.g. bg-dak-cta) won't be generated. */
+:root {
+  --dak-bg: #050505;
+  --dak-heading: #f4f4f6;
+  --dak-body: #c8cbd0;
+  --dak-cta: #9436fb;
+  --dak-muted: #777a82;
+  --dak-line: #c793ff;
+  --dak-surface: #121212;
+  --dak-border: #2b2b31;
+}
+
+@theme inline {
+  --color-dak-bg: var(--dak-bg);
+  --color-dak-heading: var(--dak-heading);
+  --color-dak-body: var(--dak-body);
+  --color-dak-cta: var(--dak-cta);
+  --color-dak-muted: var(--dak-muted);
+  --color-dak-line: var(--dak-line);
+  --color-dak-surface: var(--dak-surface);
+  --color-dak-border: var(--dak-border);
+}
