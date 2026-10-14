@@ -5,3 +5,6 @@ dist
 .env
 
 /src/generated/prisma
+
+# Files users upload while running the API locally
+/uploads

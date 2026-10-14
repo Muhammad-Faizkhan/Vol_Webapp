@@ -4,6 +4,8 @@ export type Env = {
   NODE_ENV: "development" | "production" | "test";
   PORT: number;
   DATABASE_URL: string;
+  /** Max open database connections. Set 1 for `prisma dev`, which serves one connection at a time. */
+  DATABASE_POOL_MAX?: number;
   JWT_ACCESS_SECRET: string;
   CODE_PEPPER: string;
   CORS_ORIGINS: string[];
@@ -33,6 +35,7 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     NODE_ENV: nodeEnv === "production" || nodeEnv === "test" ? nodeEnv : "development",
     PORT: port,
     DATABASE_URL: str("DATABASE_URL"),
+    DATABASE_POOL_MAX: Number(str("DATABASE_POOL_MAX", "")) || undefined,
     JWT_ACCESS_SECRET: str("JWT_ACCESS_SECRET"),
     CODE_PEPPER: str("CODE_PEPPER"),
     CORS_ORIGINS: str("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001")
