@@ -67,7 +67,7 @@ export default function JoinNetworkDarkPage() {
                 Join workspaces, learn in classrooms and collaborate on shared canvases with engineers and instructors.
               </p>
               <Link
-                href="/login?persona=individual"
+                href="/signup?persona=individual"
                 className="mt-auto flex h-14 w-full items-center justify-center rounded-2xl bg-dak-cta text-base font-medium text-white shadow-[0px_8px_6px_rgba(148,54,251,0.4)]"
               >
                 Login in as Individual profile
@@ -90,7 +90,7 @@ export default function JoinNetworkDarkPage() {
                 Publish your product catalog, run training classrooms and work with customers on shared canvases.
               </p>
               <Link
-                href="/login?persona=business"
+                href="/signup?persona=business"
                 className="mt-auto flex h-14 w-full items-center justify-center rounded-2xl bg-[#020202] text-base font-medium text-white shadow-[0px_8px_16px_rgba(2,2,2,0.4)]"
               >
                 Login in as Business profile

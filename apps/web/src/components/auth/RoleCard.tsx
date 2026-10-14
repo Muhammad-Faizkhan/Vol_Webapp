@@ -14,7 +14,7 @@ type RoleCardProps = {
   title: string;
   description: string;
   buttonLabel: string;
-  /** Where visitors who aren't signed in go, e.g. "/login?persona=business". */
+  /** Where visitors who aren't signed in go, e.g. "/signup?persona=business". */
   href: string;
   /** "cta" (bright purple) for the primary/individual card, "muted" (black button, neutral border) for the secondary/business card — same in both themes. */
   accent?: "cta" | "muted";

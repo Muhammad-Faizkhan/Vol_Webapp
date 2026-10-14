@@ -50,7 +50,7 @@ export default function JoinNetworkPage() {
               title="Individual User"
               description="Join workspaces, learn in classrooms and collaborate on shared canvases with engineers and instructors."
               buttonLabel="Login in as Individual profile"
-              href="/login?persona=individual"
+              href="/signup?persona=individual"
               accent="cta"
             />
             <RoleCard
@@ -59,7 +59,7 @@ export default function JoinNetworkPage() {
               title="Business Profile"
               description="Publish your product catalog, run training classrooms and work with customers on shared canvases."
               buttonLabel="Login in as Business profile"
-              href="/login?persona=business"
+              href="/signup?persona=business"
               accent="muted"
             />
           </div>

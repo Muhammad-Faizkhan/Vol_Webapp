@@ -58,6 +58,8 @@ function SignUpForm() {
       }
       const params = new URLSearchParams({ email, mode: "verify" });
       if (next) params.set("next", next);
+      // Lets the OTP screen's "Back" return to this persona's signup instead of asking for the role again.
+      if (accountType && persona) params.set("persona", persona);
       router.push(`/otp-verification?${params}`);
     } catch (err) {
       setError(errorMessage(err));
@@ -165,7 +167,7 @@ function SignUpForm() {
         </div>
 
         <Link
-          href="/login"
+          href={persona ? `/login?persona=${persona}` : "/login"}
           className="block w-full text-center text-sm font-medium text-[#2b2b31] dark:text-dak-heading"
         >
           Already have an account? <span className="font-bold text-dak-cta underline dark:no-underline">Sign In</span>

@@ -65,7 +65,9 @@ function OtpVerificationForm() {
   }
 
   // Shared by signup, login (2FA) and forgot-password: "Back" retraces whichever flow led here.
-  const backHref = mode === "reset" ? "/forgot-password" : mode === "login" ? "/login" : "/signup";
+  const persona = searchParams.get("persona");
+  const signupHref = persona === "individual" || persona === "business" ? `/signup?persona=${persona}` : "/signup";
+  const backHref = mode === "reset" ? "/forgot-password" : mode === "login" ? "/login" : signupHref;
 
   return (
     <AuthShell backHref={backHref}>
