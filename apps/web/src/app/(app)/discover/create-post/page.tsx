@@ -1,11 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
+import { applyFormat, type Format } from "@/components/social/RichText";
+import { POST_DRAFT_KEY } from "@/lib/format";
 import DiscoverPage from "../page";
 
 const categories = ["Structural", "Mechanical", "Electrical", "Civil", "HVAC"];
@@ -13,14 +15,44 @@ const categories = ["Structural", "Mechanical", "Electrical", "Civil", "HVAC"];
 export default function CreatePostModalPage() {
   const router = useRouter();
   const tagInputRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [tags, setTags] = useState<string[]>(["Load Analysis", "Steel Frame"]);
+  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [errors, setErrors] = useState<{ title?: string; category?: string }>({});
+
+  // Returning from the canvas step restores the draft.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(POST_DRAFT_KEY);
+      if (!saved) return;
+      const d = JSON.parse(saved);
+      /* eslint-disable react-hooks/set-state-in-effect */
+      setTitle(d.title ?? "");
+      setCategory(d.category ?? "");
+      setDescription(d.description ?? "");
+      setTags(d.tags ?? []);
+      setVisibility(d.visibility === "private" ? "private" : "public");
+      /* eslint-enable react-hooks/set-state-in-effect */
+    } catch {
+      // ignore unreadable drafts
+    }
+  }, []);
+
+  function format(kind: Format) {
+    const el = bodyRef.current;
+    if (!el) return;
+    const { value, selectionStart, selectionEnd } = applyFormat(description, el.selectionStart, el.selectionEnd, kind);
+    setDescription(value);
+    requestAnimationFrame(() => {
+      el.focus();
+      el.setSelectionRange(selectionStart, selectionEnd);
+    });
+  }
 
   const addTag = () => {
     const value = tagInput.trim();
@@ -52,12 +84,9 @@ export default function CreatePostModalPage() {
     if (Object.keys(nextErrors).length > 0) return;
 
     try {
-      window.localStorage.setItem(
-        "vol-create-post-draft",
-        JSON.stringify({ title, category, description, tags, visibility })
-      );
+      sessionStorage.setItem(POST_DRAFT_KEY, JSON.stringify({ title, category, description, tags, visibility }));
     } catch {
-      // localStorage unavailable — proceed without persisting the draft
+      // storage unavailable — the canvas step will ask to start over
     }
 
     router.push("/discover/select-canvas");
@@ -135,22 +164,23 @@ export default function CreatePostModalPage() {
                   Description &amp; Details
                 </label>
                 <div className="flex items-center gap-1 rounded border border-[#2b2b31] px-1.5 py-1 dark:border-dak-border">
-                  <button type="button" aria-label="Bold" className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
+                  <button type="button" aria-label="Bold" onClick={() => format("bold")} className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
                     <Image src="/icons/format-bold.svg" alt="" width={7.8} height={10.5} className="dark:invert" />
                   </button>
-                  <button type="button" aria-label="Italic" className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
+                  <button type="button" aria-label="Italic" onClick={() => format("italic")} className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
                     <Image src="/icons/format-italic.svg" alt="" width={9.75} height={10.5} className="dark:invert" />
                   </button>
                   <span className="mx-0.5 h-5 w-px bg-[#2b2b31] dark:bg-dak-border" />
-                  <button type="button" aria-label="Numbered list" className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
+                  <button type="button" aria-label="Numbered list" onClick={() => format("numbered")} className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
                     <Image src="/icons/format-list-numbered.svg" alt="" width={13.5} height={15} className="dark:invert" />
                   </button>
-                  <button type="button" aria-label="Bulleted list" className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
+                  <button type="button" aria-label="Bulleted list" onClick={() => format("bulleted")} className="rounded p-1.5 hover:bg-black/5 dark:hover:bg-white/10">
                     <Image src="/icons/format-list-bulleted.svg" alt="" width={13.5} height={12} className="dark:invert" />
                   </button>
                 </div>
               </div>
               <textarea
+                ref={bodyRef}
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}

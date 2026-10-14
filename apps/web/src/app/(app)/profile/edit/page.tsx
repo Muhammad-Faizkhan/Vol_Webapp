@@ -1,5 +1,5 @@
-import { ProfileOverview } from "@/components/profile/ProfileOverview";
+import { IndividualProfileEditForm } from "@/components/profile/ProfileEditForm";
 
 export default function EditProfileIndividualPage() {
-  return <ProfileOverview persona="individual" />;
+  return <IndividualProfileEditForm />;
 }

@@ -4,9 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ApiError, errorMessage, type LoginResult } from "@vol/api-client";
+import { useAuth } from "@vol/api-client/react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { RedirectIfSignedIn } from "@/components/auth/RedirectIfSignedIn";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { api, homeFor, safeNext } from "@/lib/api";
 
 function LoginForm() {
   const router = useRouter();
@@ -15,7 +19,11 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const { setSession } = useAuth();
+  const next = safeNext(searchParams.get("next"));
+  const notice = searchParams.get("reset") ? "Password updated. Log in with your new password." : null;
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const email = String(data.get("email") ?? "").trim();
@@ -29,11 +37,22 @@ function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
-      localStorage.setItem("vol-persona", persona === "business" ? "business" : "individual");
-    } catch {
-      // ignore write failures (private browsing, etc.)
+      const result = await api.post<LoginResult>("/auth/login", { email, password });
+      if ("twoFactorRequired" in result) {
+        router.push(otpUrl(email, "login", next));
+        return;
+      }
+      setSession(result);
+      router.push(next ?? homeFor(result.user));
+    } catch (err) {
+      if (err instanceof ApiError && err.code === "EMAIL_NOT_VERIFIED") {
+        // The API just emailed a fresh code; finish verification, then continue onboarding.
+        router.push(otpUrl(email, "verify", next));
+        return;
+      }
+      setError(errorMessage(err));
+      setSubmitting(false);
     }
-    router.push(persona === "business" ? "/business/home" : "/home");
   }
 
   return (
@@ -137,6 +156,7 @@ function LoginForm() {
               </Link>
             </div>
 
+            {notice && !error && <p className="w-full text-sm font-medium text-[#34a853]">{notice}</p>}
             {error && <p className="w-full text-sm font-medium text-red-500 dark:text-red-400">{error}</p>}
 
             <Button type="submit" variant="dark" disabled={submitting}>
@@ -156,9 +176,16 @@ function LoginForm() {
   );
 }
 
+function otpUrl(email: string, mode: "login" | "verify", next: string | null) {
+  const params = new URLSearchParams({ email, mode });
+  if (next) params.set("next", next);
+  return `/otp-verification?${params}`;
+}
+
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
+      <RedirectIfSignedIn />
       <LoginForm />
     </Suspense>
   );

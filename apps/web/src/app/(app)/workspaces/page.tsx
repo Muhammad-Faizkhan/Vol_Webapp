@@ -3,33 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { timeAgo, type Paged, type WorkspaceCard as WorkspaceCardData } from "@vol/api-client";
+import { useApiQuery, withQuery } from "@vol/api-client/react";
+import { CreateCanvasButton } from "@/components/canvas/CreateCanvasButton";
 import { WorkspaceCard } from "@/components/cards/WorkspaceCard";
-
-const workspaces = Array.from({ length: 4 }).map((_, i) => ({
-  href: `/workspaces/${i + 1}`,
-  title: "Abc Workspace",
-  meta: "8 canvases · 5 members",
-  metaSecondary: "Edited 12min ago . 4 Products",
-  collaboratorCount: 3,
-  updatedTag: i % 2 === 1 ? "UPDATED 2H AGO" : undefined,
-  imageSrc: "/illustrations/canvas-thumb-moodboard.png",
-}));
-
-const businessWorkspaceAvatars = ["/avatars/avatar-1.jpg", "/avatars/avatar-2.jpg", "/avatars/avatar-3.jpg"];
-
-const businessWorkspaces = Array.from({ length: 4 }).map((_, i) => ({
-  href: `/workspaces/business-${i + 1}`,
-  title: "Lorem Ipsum Title",
-  workspace: "Lorem Ipsum Workspace",
-  editedAgo: "Edited 12min ago",
-  updatedTag: "UPDATED 2H AGO",
-  collaboratorAvatars: businessWorkspaceAvatars,
-  collaboratorCount: 2,
-  imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
-}));
+import { EmptyState, ErrorState, LoadingGrid, Pager } from "@/components/ui/States";
+import { updatedTag } from "@/lib/format";
 
 export default function WorkspacesPage() {
   const [tab, setTab] = useState<"business" | "mine">("mine");
+  const [page, setPage] = useState(1);
+  const { data, error, isLoading, mutate } = useApiQuery<Paged<WorkspaceCardData>>(
+    withQuery("/workspaces", { scope: tab, page, limit: 12 }),
+  );
+  const total = data?.total;
 
   return (
     <div className="flex w-full flex-col gap-7">
@@ -43,18 +30,17 @@ export default function WorkspacesPage() {
               Workspaces
             </h1>
             <p className="text-base text-auth-slate dark:text-dak-body">
-              8 Lorem Ipsum is simply dummy text of the printing and typesetting
+              {total === undefined
+                ? "Your projects, canvases and collaborators."
+                : `${total} ${tab === "mine" ? "workspace" : "shared workspace"}${total === 1 ? "" : "s"} · projects, canvases and collaborators in one place.`}
             </p>
           </div>
         </div>
         <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start">
-          <Link
-            href="/canvas/1"
-            className="flex h-14 items-center justify-center gap-4 rounded-xl border border-light-border bg-app-dark-surface px-[17px] text-base text-white"
-          >
+          <CreateCanvasButton className="flex h-14 items-center justify-center gap-4 rounded-xl border border-light-border bg-app-dark-surface px-[17px] text-base text-white">
             <Image src="/icons/new-canvas-white.svg" alt="" width={12} height={15} />
             Create Canvas
-          </Link>
+          </CreateCanvasButton>
           <Link
             href="/workspaces/create"
             className="flex h-14 items-center justify-center gap-4 rounded-xl bg-dak-cta px-4 text-base text-white"
@@ -68,7 +54,10 @@ export default function WorkspacesPage() {
       <div className="flex gap-6 overflow-x-auto border-b border-light-border dark:border-dak-border">
         <button
           type="button"
-          onClick={() => setTab("business")}
+          onClick={() => {
+            setTab("business");
+            setPage(1);
+          }}
           className={`flex shrink-0 flex-col items-center gap-2 pb-2 text-lg font-medium ${
             tab === "business" ? "text-auth-navy dark:text-dak-heading" : "text-[#929292] dark:text-dak-muted"
           }`}
@@ -78,7 +67,10 @@ export default function WorkspacesPage() {
         </button>
         <button
           type="button"
-          onClick={() => setTab("mine")}
+          onClick={() => {
+            setTab("mine");
+            setPage(1);
+          }}
           className={`flex shrink-0 flex-col items-center gap-2 pb-2 text-lg font-medium ${
             tab === "mine" ? "text-auth-navy dark:text-dak-heading" : "text-[#929292] dark:text-dak-muted"
           }`}
@@ -88,19 +80,56 @@ export default function WorkspacesPage() {
         </button>
       </div>
 
-      {tab === "mine" ? (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
-          {workspaces.map((ws, i) => (
-            <WorkspaceCard key={i} variant="grid" showCollaboratorFooter={false} {...ws} />
+      {error ? (
+        <ErrorState error={error} onRetry={() => mutate()} />
+      ) : isLoading || !data ? (
+        <LoadingGrid />
+      ) : data.items.length === 0 ? (
+        tab === "mine" ? (
+          <EmptyState
+            title="No workspaces yet"
+            body="Create a workspace to organise canvases and invite collaborators."
+            action={{ label: "Create Workspace", href: "/workspaces/create" }}
+          />
+        ) : (
+          <EmptyState title="Nothing shared yet" body="Workspaces that businesses invite you to will appear here." />
+        )
+      ) : tab === "mine" ? (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
+          {data.items.map((ws) => (
+            <WorkspaceCard
+              key={ws.id}
+              variant="grid"
+              showCollaboratorFooter={false}
+              href={`/workspaces/${ws.id}`}
+              title={ws.name}
+              meta={`${ws.canvasCount} canvas${ws.canvasCount === 1 ? "" : "es"} · ${ws.memberCount} member${ws.memberCount === 1 ? "" : "s"}`}
+              metaSecondary={`Edited ${timeAgo(ws.lastActivityAt)} · ${ws.productCount} Product${ws.productCount === 1 ? "" : "s"}`}
+              collaboratorCount={ws.memberCount}
+              updatedTag={updatedTag(ws.lastActivityAt)}
+              imageSrc={ws.imageUrl ?? undefined}
+            />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
-          {businessWorkspaces.map((ws, i) => (
-            <WorkspaceCard key={i} {...ws} />
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
+          {data.items.map((ws) => (
+            <WorkspaceCard
+              key={ws.id}
+              href={`/workspaces/${ws.id}`}
+              title={ws.name}
+              workspace={`By ${ws.owner.name}`}
+              editedAgo={`Edited ${timeAgo(ws.lastActivityAt)}`}
+              updatedTag={updatedTag(ws.lastActivityAt)}
+              collaborators={ws.members}
+              collaboratorCount={ws.memberCount}
+              imageSrc={ws.imageUrl ?? undefined}
+            />
           ))}
         </div>
       )}
+      {data && <Pager page={data.page} pages={data.pages} onPage={setPage} />}
     </div>
   );
 }
+

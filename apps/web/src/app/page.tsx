@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { RoleCard } from "@/components/auth/RoleCard";
+import { RedirectIfSignedIn } from "@/components/auth/RedirectIfSignedIn";
 import { ThemeToggleButton } from "@/components/theme/ThemeToggleButton";
 
 export default function WelcomePage() {
   return (
     <div className="relative flex min-h-[100dvh] w-full flex-col overflow-hidden bg-app-bg dark:bg-dak-bg lg:flex-row lg:rounded-[50px]">
+      <RedirectIfSignedIn />
       <div className="pointer-events-none absolute inset-0">
         <Image src="/illustrations/light-swirl-bg.png" alt="" fill className="block object-cover dark:hidden" />
         <Image src="/illustrations/dark-swirl-bg.svg" alt="" fill className="hidden object-cover dark:block" />
@@ -49,7 +51,7 @@ export default function WelcomePage() {
             <RoleCard
               iconSrc="/icons/individual-dark.png"
               title="Individual User"
-              description="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+              description="Join workspaces, learn in classrooms and collaborate on shared canvases with engineers and instructors."
               buttonLabel="Continue as Individual"
               href="/login?persona=individual"
               accent="cta"
@@ -58,7 +60,7 @@ export default function WelcomePage() {
               iconSrc="/icons/business-dark.png"
               iconClassName="object-cover"
               title="Business Profile"
-              description="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+              description="Publish your product catalog, run training classrooms and work with customers on shared canvases."
               buttonLabel="Continue as Business"
               href="/login?persona=business"
               accent="muted"

@@ -2,34 +2,48 @@
 
 import Image from "next/image";
 import { Suspense, useState, type FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { errorMessage, type Me } from "@vol/api-client";
+import { useAuth } from "@vol/api-client/react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { OnboardingGuard } from "@/components/auth/OnboardingGuard";
+import { api, homeFor } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 
 function NetworkVisibilityForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const persona = searchParams.get("persona");
-  const [visibility, setVisibility] = useState<"public" | "private">("public");
+  const { user, setUser } = useAuth();
+  const [visibility, setVisibility] = useState<"public" | "private">(
+    user?.profile?.visibility === "PRIVATE" ? "private" : "public",
+  );
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    setError(null);
     setSubmitting(true);
     try {
-      localStorage.setItem("vol-persona", persona === "business" ? "business" : "individual");
-    } catch {
-      // ignore write failures (private browsing, etc.)
+      await api.patch("/users/me/preferences", {
+        visibility: visibility === "private" ? "PRIVATE" : "PUBLIC",
+        searchIndexing: data.get("searchIndexing") === "on",
+      });
+      const updated = await api.post<Me>("/users/me/complete-onboarding");
+      setUser(updated);
+      router.push(homeFor(updated));
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
     }
-    router.push(persona === "business" ? "/business/home" : "/home");
   }
 
   const publicSelected = visibility === "public";
   const privateSelected = visibility === "private";
 
   return (
-    <AuthShell contentWidth={652} backHref={persona ? `/create-profile?persona=${persona}` : "/create-profile"}>
+    <AuthShell contentWidth={652} backHref="/create-profile">
       <div className="flex w-full flex-col items-center gap-[clamp(0.375rem,1.5dvh,2.5rem)]">
         <div className="flex w-full max-w-[396px] flex-col items-center gap-[clamp(0.375rem,1dvh,1.5rem)]">
           <Image
@@ -169,10 +183,16 @@ function NetworkVisibilityForm() {
                     Include profile in internal talent searches.
                   </span>
                 </div>
-                <Toggle name="searchIndexing" defaultChecked className="!bg-[#020204] dark:!bg-dak-cta" />
+                <Toggle
+                  name="searchIndexing"
+                  defaultChecked={user?.profile?.searchIndexing ?? true}
+                  className="!bg-[#020204] dark:!bg-dak-cta"
+                />
               </div>
             </div>
           </div>
+
+          {error && <p className="w-full text-sm font-medium text-red-500 dark:text-red-400">{error}</p>}
 
           <div className="w-full pt-2">
             <Button
@@ -192,7 +212,9 @@ function NetworkVisibilityForm() {
 export default function NetworkVisibilityPage() {
   return (
     <Suspense fallback={null}>
-      <NetworkVisibilityForm />
+      <OnboardingGuard>
+        <NetworkVisibilityForm />
+      </OnboardingGuard>
     </Suspense>
   );
 }

@@ -1,0 +1,763 @@
+// VÔL data model. Shared by the user app (apps/web) and the admin panel (apps/admin) through apps/api.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Accounts & auth ──────────────────────────────────────────────────────────
+
+enum AccountType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+model User {
+  id              String        @id @default(cuid())
+  // Human-facing id shown in the admin panel as USR-<number>.
+  number          Int           @unique @default(autoincrement())
+  email           String        @unique // stored lowercased
+  username        String?       @unique
+  passwordHash    String? // null for OAuth-only accounts
+  accountType     AccountType   @default(INDIVIDUAL)
+  role            UserRole      @default(USER)
+  status          AccountStatus @default(ACTIVE)
+  suspendedUntil  DateTime?
+  emailVerifiedAt DateTime?
+  onboardedAt     DateTime? // set once create-profile + network-visibility are done
+  lastActiveAt    DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  profile           Profile?
+  business          BusinessProfile?
+  oauthAccounts     OAuthAccount[]
+  sessions          Session[]
+  verificationCodes VerificationCode[]
+
+  ownedWorkspaces      Workspace[]            @relation("WorkspaceOwner")
+  workspaceMembers     WorkspaceMember[]
+  sentWorkspaceInvites WorkspaceInvite[]      @relation("WorkspaceInviter")
+  joinRequests         WorkspaceJoinRequest[]
+  workspaceActivity    WorkspaceActivity[]
+  createdCanvases      Canvas[]
+  canvasRevisions      CanvasRevision[]
+  canvasProducts       CanvasProduct[]
+  taughtClassrooms     Classroom[]            @relation("ClassroomInstructor")
+  enrollments          ClassroomEnrollment[]
+  lessonCompletions    LessonCompletion[]
+  posts                Post[]
+  postComments         PostComment[]
+  postLikes            PostLike[]
+  products             Product[]
+  following            Follow[]               @relation("Follower")
+  followers            Follow[]               @relation("Following")
+  notifications        Notification[]         @relation("NotificationRecipient")
+  notificationsSent    Notification[]         @relation("NotificationActor")
+  uploads              Upload[]
+
+  reportsFiled      Report[]           @relation("ReportReporter")
+  casesAgainst      Case[]             @relation("CaseReportedUser")
+  casesFiled        Case[]             @relation("CaseReporter")
+  casesAssigned     Case[]             @relation("CaseAssignee")
+  moderationActions ModerationAction[] @relation("ModerationTarget")
+  moderationTaken   ModerationAction[] @relation("ModerationActor")
+  auditLogs         AuditLog[]
+  policyEdits       Policy[]
+  settingEdits      SystemSetting[]
+  loginAttempts     LoginAttempt[]
+
+  @@index([status])
+  @@index([accountType])
+  @@index([createdAt])
+}
+
+model Profile {
+  userId             String     @id
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName           String
+  avatarUrl          String?
+  coverUrl           String?
+  bio                String?
+  specialty          String? // shown as the member's "profile type", e.g. Contractor, Instructor
+  interests          String[]
+  tags               String[]
+  portfolioUrl       String?
+  phone              String?
+  country            String?
+  city               String?
+  visibility         Visibility @default(PUBLIC)
+  searchIndexing     Boolean    @default(true)
+  emailNotifications Boolean    @default(true)
+  updatedAt          DateTime   @updatedAt
+}
+
+enum BusinessVerification {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model BusinessProfile {
+  userId             String               @id
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  legalName          String
+  contactEmail       String?
+  phone              String?
+  website            String?
+  description        String?
+  logoUrl            String?
+  coverUrl           String?
+  specialty          String?
+  industry           String?
+  categoryTags       String[]
+  verification       BusinessVerification @default(UNVERIFIED)
+  verificationDocUrl String?
+  verifiedAt         DateTime?
+  updatedAt          DateTime             @updatedAt
+}
+
+enum OAuthProvider {
+  GOOGLE
+  APPLE
+}
+
+model OAuthAccount {
+  id                String        @id @default(cuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          OAuthProvider
+  providerAccountId String
+  createdAt         DateTime      @default(now())
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// One row per signed-in device. The refresh token itself is never stored, only its hash.
+model Session {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String    @unique
+  isAdmin          Boolean   @default(false)
+  userAgent        String?
+  ip               String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  lastUsedAt       DateTime  @default(now())
+
+  @@index([userId])
+}
+
+enum CodePurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  ADMIN_LOGIN
+  LOGIN_2FA
+}
+
+// Six-digit codes for the OTP screens. Stored hashed, single use, attempt-limited.
+model VerificationCode {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose    CodePurpose
+  codeHash   String
+  attempts   Int         @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime    @default(now())
+
+  @@index([userId, purpose])
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  success   Boolean
+  isAdmin   Boolean  @default(false)
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([isAdmin, success, createdAt])
+}
+
+// Images and documents uploaded by users. Files live in the storage backend under `key`.
+model Upload {
+  id        String   @id @default(cuid())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  key       String   @unique
+  url       String
+  name      String
+  mimeType  String
+  sizeBytes Int
+  createdAt DateTime @default(now())
+
+  @@index([ownerId])
+}
+
+// ─── Social graph & notifications ─────────────────────────────────────────────
+
+model Follow {
+  followerId  String
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+}
+
+enum NotificationType {
+  WORKSPACE_INVITE
+  WORKSPACE_JOIN_REQUEST
+  WORKSPACE_JOIN_ACCEPTED
+  CLASSROOM_ENROLLED
+  POST_COMMENT
+  POST_LIKE
+  NEW_FOLLOWER
+  ACCOUNT_WARNING
+  SECURITY_ALERT
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  user       User             @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String
+  body       String
+  actorId    String?
+  actor      User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  // What the notification points at (e.g. { workspaceId, inviteId }) so the UI can link or act on it.
+  data       Json?
+  readAt     DateTime?
+  resolvedAt DateTime? // set once an actionable notification (invite, request) is answered
+  createdAt  DateTime         @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// ─── Workspaces & canvases ────────────────────────────────────────────────────
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  COLLABORATOR
+  VIEWER
+}
+
+model Workspace {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  industry    String?
+  imageUrl    String?
+  visibility  Visibility @default(PRIVATE)
+  ownerId     String
+  owner       User       @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  members      WorkspaceMember[]
+  invites      WorkspaceInvite[]
+  joinRequests WorkspaceJoinRequest[]
+  folders      CanvasFolder[]
+  canvases     Canvas[]
+  activity     WorkspaceActivity[]
+
+  @@index([ownerId])
+}
+
+model WorkspaceMember {
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        WorkspaceRole
+  joinedAt    DateTime      @default(now())
+
+  @@id([workspaceId, userId])
+  @@index([userId])
+}
+
+// A direct invite (email set, answered by the invitee) or a shareable link (email null; anyone who
+// opens it files a join request for the workspace admins to approve).
+model WorkspaceInvite {
+  id          String        @id @default(cuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String?
+  role        WorkspaceRole
+  token       String        @unique
+  invitedById String
+  invitedBy   User          @relation("WorkspaceInviter", fields: [invitedById], references: [id])
+  expiresAt   DateTime?
+  acceptedAt  DateTime?
+  declinedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@index([workspaceId])
+  @@index([email])
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model WorkspaceJoinRequest {
+  id          String        @id @default(cuid())
+  workspaceId String
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  decidedAt   DateTime?
+
+  @@unique([workspaceId, userId])
+}
+
+model WorkspaceActivity {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actorId     String?
+  actor       User?     @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  message     String // e.g. "added 6 products to Bathroom Project"
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, createdAt])
+}
+
+model CanvasFolder {
+  id          String    @id @default(cuid())
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name        String
+  createdAt   DateTime  @default(now())
+  canvases    Canvas[]
+
+  @@unique([workspaceId, name])
+}
+
+model Canvas {
+  id           String        @id @default(cuid())
+  workspaceId  String
+  workspace    Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  folderId     String?
+  folder       CanvasFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  title        String
+  thumbnailUrl String?
+  visibility   Visibility    @default(PRIVATE)
+  data         Json          @default("{}") // editor document: { objects: [...] }
+  createdById  String
+  createdBy    User          @relation(fields: [createdById], references: [id])
+  deletedAt    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  revisions CanvasRevision[]
+  products  CanvasProduct[]
+  posts     Post[]
+  lessons   Lesson[]
+
+  @@index([workspaceId])
+}
+
+model CanvasRevision {
+  id        String   @id @default(cuid())
+  canvasId  String
+  canvas    Canvas   @relation(fields: [canvasId], references: [id], onDelete: Cascade)
+  data      Json
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([canvasId, createdAt])
+}
+
+// Products placed on a canvas (the "4 Products" count on canvas cards).
+model CanvasProduct {
+  canvasId  String
+  canvas    Canvas   @relation(fields: [canvasId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  addedById String
+  addedBy   User     @relation(fields: [addedById], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([canvasId, productId])
+}
+
+// ─── Classrooms ───────────────────────────────────────────────────────────────
+
+enum ClassroomStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+model Classroom {
+  id             String          @id @default(cuid())
+  title          String
+  description    String?
+  category       String?
+  skillLevel     SkillLevel?
+  imageUrl       String?
+  targetAudience String?
+  durationLabel  String? // e.g. "12 Weeks (40 hrs)"
+  visibility     Visibility      @default(PUBLIC) // public classrooms appear in Explore with a preview
+  joinCode       String          @unique
+  status         ClassroomStatus @default(DRAFT)
+  instructorId   String
+  instructor     User            @relation("ClassroomInstructor", fields: [instructorId], references: [id])
+  deletedAt      DateTime?
+  publishedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  modules     ClassroomModule[]
+  enrollments ClassroomEnrollment[]
+  posts       Post[]
+
+  @@index([instructorId])
+  @@index([status])
+}
+
+model ClassroomModule {
+  id              String    @id @default(cuid())
+  classroomId     String
+  classroom       Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  title           String
+  description     String?
+  position        Int
+  durationMinutes Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  lessons Lesson[]
+
+  @@index([classroomId, position])
+}
+
+enum LessonKind {
+  VIDEO
+  DOCUMENT
+  CANVAS
+  QUIZ
+}
+
+model Lesson {
+  id              String          @id @default(cuid())
+  moduleId        String
+  module          ClassroomModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title           String
+  kind            LessonKind
+  position        Int
+  durationMinutes Int?
+  body            String? // notes, or quiz questions as text
+  resourceUrl     String? // video or document URL
+  canvasId        String?
+  canvas          Canvas?         @relation(fields: [canvasId], references: [id], onDelete: SetNull)
+  createdAt       DateTime        @default(now())
+
+  completions LessonCompletion[]
+
+  @@index([moduleId, position])
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model ClassroomEnrollment {
+  classroomId String
+  classroom   Classroom        @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      EnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime         @default(now())
+
+  @@id([classroomId, userId])
+  @@index([userId])
+}
+
+model LessonCompletion {
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completedAt DateTime @default(now())
+
+  @@id([lessonId, userId])
+  @@index([userId])
+}
+
+// ─── Discover feed ────────────────────────────────────────────────────────────
+
+model Post {
+  id          String     @id @default(cuid())
+  authorId    String
+  author      User       @relation(fields: [authorId], references: [id])
+  title       String
+  body        String
+  category    String?
+  tags        String[]
+  imageUrl    String?
+  visibility  Visibility @default(PUBLIC)
+  canvasId    String?
+  canvas      Canvas?    @relation(fields: [canvasId], references: [id], onDelete: SetNull)
+  // Set for classroom discussion threads; those stay out of the public feed.
+  classroomId String?
+  classroom   Classroom? @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  viewCount   Int        @default(0)
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  comments PostComment[]
+  likes    PostLike[]
+
+  @@index([authorId])
+  @@index([classroomId])
+  @@index([createdAt])
+}
+
+model PostComment {
+  id        String    @id @default(cuid())
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  body      String
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([postId, createdAt])
+}
+
+model PostLike {
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([postId, userId])
+}
+
+// ─── Business catalog ─────────────────────────────────────────────────────────
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  REMOVED
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  businessId  String
+  business    User          @relation(fields: [businessId], references: [id])
+  name        String
+  brand       String?
+  category    String?
+  trade       String? // trade specialization filter, e.g. "Tiling & Flooring"
+  description String?
+  heightMm    Decimal?      @db.Decimal(10, 2)
+  widthMm     Decimal?      @db.Decimal(10, 2)
+  lengthMm    Decimal?      @db.Decimal(10, 2)
+  weightKg    Decimal?      @db.Decimal(10, 2)
+  price       Decimal?      @db.Decimal(12, 2)
+  currency    String        @default("USD")
+  images      String[]
+  status      ProductStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  canvases CanvasProduct[]
+
+  @@index([businessId])
+  @@index([status])
+}
+
+// ─── Trust & safety / admin ───────────────────────────────────────────────────
+
+enum ReportTarget {
+  USER
+  POST
+  COMMENT
+  PRODUCT
+  WORKSPACE
+  CANVAS
+  CLASSROOM
+}
+
+// A user-submitted report. Reports about the same account are grouped into one open Case.
+model Report {
+  id         String       @id @default(cuid())
+  reporterId String
+  reporter   User         @relation("ReportReporter", fields: [reporterId], references: [id])
+  targetType ReportTarget
+  targetId   String
+  reason     String
+  details    String?
+  caseId     String?
+  case       Case?        @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  createdAt  DateTime     @default(now())
+
+  @@index([targetType, targetId])
+  @@index([caseId])
+}
+
+enum CaseStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+model Case {
+  id             String     @id @default(cuid())
+  // Shown in the admin panel as ESC-<number, zero-padded>.
+  number         Int        @unique @default(autoincrement())
+  title          String
+  violation      String
+  status         CaseStatus @default(OPEN)
+  reportedUserId String
+  reportedUser   User       @relation("CaseReportedUser", fields: [reportedUserId], references: [id])
+  reporterId     String?
+  reporter       User?      @relation("CaseReporter", fields: [reporterId], references: [id])
+  assigneeId     String?
+  assignee       User?      @relation("CaseAssignee", fields: [assigneeId], references: [id])
+  location       String?
+  recommendation String?
+  evidence       String[]
+  escalatedAt    DateTime   @default(now())
+  resolvedAt     DateTime?
+  reopenedAt     DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  reports Report[]
+  actions ModerationAction[]
+
+  @@index([status])
+  @@index([reportedUserId])
+}
+
+enum ModerationType {
+  WARNING
+  SUSPEND
+  BAN
+  DELETE
+  REINSTATE
+  DISMISS_CASE
+}
+
+// Every admin modal (suspend, ban, delete, warn, dismiss) requires a reason; it lands here.
+model ModerationAction {
+  id           String         @id @default(cuid())
+  type         ModerationType
+  reason       String
+  targetUserId String
+  targetUser   User           @relation("ModerationTarget", fields: [targetUserId], references: [id])
+  actorId      String
+  actor        User           @relation("ModerationActor", fields: [actorId], references: [id])
+  caseId       String?
+  case         Case?          @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  expiresAt    DateTime? // for time-limited suspensions
+  createdAt    DateTime       @default(now())
+
+  @@index([targetUserId])
+}
+
+// Append-only record of privileged actions (admin + security-relevant user actions).
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String // e.g. "user.suspend", "policy.publish", "settings.update"
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+enum PolicyType {
+  TERMS
+  PRIVACY
+}
+
+// Each publish creates a new version; the latest published row is the live policy.
+model Policy {
+  id          String     @id @default(cuid())
+  type        PolicyType
+  version     Int
+  content     String
+  publishedAt DateTime?
+  updatedById String?
+  updatedBy   User?      @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now())
+
+  @@unique([type, version])
+}
+
+// Admin "System Settings" values, one row per setting key (e.g. "users.emailVerificationRequired").
+// Keys without a row use the default from the API's settings registry.
+model SystemSetting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedBy   User?    @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt   DateTime @updatedAt
+}

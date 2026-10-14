@@ -4,10 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { errorMessage, type SignupResult } from "@vol/api-client";
+import { useAuth } from "@vol/api-client/react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { RedirectIfSignedIn } from "@/components/auth/RedirectIfSignedIn";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { TextField } from "@/components/ui/TextField";
+import { api, homeFor } from "@/lib/api";
 
 function SignUpForm() {
   const router = useRouter();
@@ -16,7 +20,9 @@ function SignUpForm() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const { setSession } = useAuth();
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const email = String(data.get("email") ?? "").trim();
@@ -39,10 +45,24 @@ function SignUpForm() {
 
     setError(null);
     setSubmitting(true);
-    const next = persona ? `/create-profile?persona=${persona}` : "/join-network";
-    router.push(
-      `/otp-verification?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`
-    );
+    try {
+      const accountType = persona === "business" ? "BUSINESS" : persona === "individual" ? "INDIVIDUAL" : undefined;
+      // Without a persona the account type is picked on the join-network screen after verification.
+      const next = accountType ? null : "/join-network";
+      const result = await api.post<SignupResult>("/auth/signup", { email, password, accountType });
+      if ("accessToken" in result) {
+        // Email verification is switched off by the admins: the account is ready straight away.
+        setSession(result);
+        router.push(next ?? homeFor(result.user));
+        return;
+      }
+      const params = new URLSearchParams({ email, mode: "verify" });
+      if (next) params.set("next", next);
+      router.push(`/otp-verification?${params}`);
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -158,6 +178,7 @@ function SignUpForm() {
 export default function SignUpPage() {
   return (
     <Suspense fallback={null}>
+      <RedirectIfSignedIn />
       <SignUpForm />
     </Suspense>
   );

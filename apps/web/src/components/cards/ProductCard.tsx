@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { UserImage } from "@/components/ui/UserImage";
 
 type ProductCardProps = {
   href: string;
@@ -14,7 +15,7 @@ export function ProductCard({ href, brand, name, specs, imageSrc }: ProductCardP
     <div className="flex w-full flex-col overflow-hidden rounded-lg border border-[rgba(198,198,205,0.6)] bg-white dark:border-dak-border dark:bg-dak-surface">
       <div className="relative flex h-[130px] items-center justify-center overflow-hidden rounded-t-lg bg-auth-navy dark:bg-dak-surface">
         {imageSrc ? (
-          <Image src={imageSrc} alt="" fill className="object-cover" />
+          <UserImage src={imageSrc} />
         ) : (
           <Image src="/illustrations/auth-placeholder.svg" alt="" width={36} height={36} />
         )}

@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { errorMessage } from "@vol/api-client";
+import { api, RESET_TOKEN_KEY } from "@/lib/api";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const password = String(data.get("password") ?? "");
@@ -26,10 +28,22 @@ export default function ResetPasswordPage() {
       setError("Passwords don't match.");
       return;
     }
+    const resetToken = sessionStorage.getItem(RESET_TOKEN_KEY);
+    if (!resetToken) {
+      setError("Your reset session expired. Request a new code from Forgot Password.");
+      return;
+    }
 
     setError(null);
     setSubmitting(true);
-    router.push("/login");
+    try {
+      await api.post("/auth/reset-password", { resetToken, password });
+      sessionStorage.removeItem(RESET_TOKEN_KEY);
+      router.push("/login?reset=1");
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
+    }
   }
 
   return (

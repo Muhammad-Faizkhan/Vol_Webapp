@@ -5,7 +5,11 @@ import type { ClipboardEvent, KeyboardEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { errorMessage, type ClassroomPreview } from "@vol/api-client";
+import { useApiQuery, useInvalidate } from "@vol/api-client/react";
 import { Modal } from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/Toast";
+import { api } from "@/lib/api";
 import MyClassroomsPage from "../page";
 
 const CODE_LENGTH = 6;
@@ -46,9 +50,24 @@ export default function JoinClassroomModalPage() {
     inputRefs.current[Math.min(pasted.length, CODE_LENGTH - 1)]?.focus();
   };
 
-  const handleJoin = () => {
-    if (!isComplete) return;
-    router.push("/classrooms/1");
+  const toast = useToast();
+  const invalidate = useInvalidate();
+  const [joining, setJoining] = useState(false);
+  // Look the class up as soon as the code is complete so the user can see what they're joining.
+  const { data: preview, error: previewError } = useApiQuery<ClassroomPreview>(isComplete ? `/classrooms/code/${code}` : null);
+
+  const handleJoin = async () => {
+    if (!isComplete || !preview) return;
+    setJoining(true);
+    try {
+      const { classroomId } = await api.post<{ classroomId: string }>("/classrooms/join", { code });
+      await invalidate("/classrooms");
+      toast(`You joined ${preview.title}`);
+      router.push(`/classrooms/${classroomId}`);
+    } catch (err) {
+      toast(errorMessage(err), "error");
+      setJoining(false);
+    }
   };
 
   return (
@@ -94,7 +113,13 @@ export default function JoinClassroomModalPage() {
             </p>
           </div>
 
-          {isComplete && (
+          {isComplete && previewError && (
+            <p role="alert" className="text-sm font-medium text-red-500 dark:text-red-400">
+              {errorMessage(previewError)}
+            </p>
+          )}
+
+          {isComplete && preview && (
             <div className="relative flex items-start gap-4 overflow-hidden rounded-xl border border-[#cacaca] bg-[#020204] p-[17px]">
               <div className="absolute -right-10 -top-9 size-32 rounded-xl bg-[rgba(79,98,110,0.1)] blur-xl" />
               <div className="relative flex size-12 shrink-0 items-center justify-center rounded bg-[rgba(230,230,230,0.3)]">
@@ -102,12 +127,14 @@ export default function JoinClassroomModalPage() {
               </div>
               <div className="relative flex flex-1 flex-col gap-1">
                 <span className="w-fit rounded-xl bg-[rgba(148,54,251,0.3)] px-2 py-1 text-xs font-semibold text-dak-cta">
-                  Verified Class
+                  {preview.instructor.verified ? "Verified Class" : (preview.category ?? "Classroom")}
                 </span>
-                <h3 className="text-2xl font-medium text-white">Advanced Architectural Substrates</h3>
+                <h3 className="text-2xl font-medium text-white">{preview.title}</h3>
                 <div className="flex items-center gap-2 pt-1">
                   <Image src="/icons/instructor.svg" alt="" width={9} height={9} />
-                  <span className="text-sm text-white">Instructor: Mark Williams</span>
+                  <span className="text-sm text-white">
+                    Instructor: {preview.instructor.name} · {preview.moduleCount} modules · {preview.enrolledCount} enrolled
+                  </span>
                 </div>
               </div>
             </div>
@@ -120,10 +147,10 @@ export default function JoinClassroomModalPage() {
           </Link>
           <button
             onClick={handleJoin}
-            disabled={!isComplete}
+            disabled={!preview || joining}
             className="rounded border border-white/20 bg-dak-cta px-6 py-2.5 text-sm font-medium text-white shadow-[0px_1px_1px_rgba(0,0,0,0.05)] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Join Classroom
+            {joining ? "Joining…" : "Join Classroom"}
           </button>
         </div>
       </Modal>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { UserImage } from "@/components/ui/UserImage";
 
 type ClassCardProps = {
   href: string;
@@ -27,7 +28,7 @@ export function ClassCard({ href, title, subtitle, modules, tag, badge, progress
     >
       <div className="relative flex h-[130px] shrink-0 items-center justify-center overflow-hidden rounded-t-lg bg-auth-navy dark:bg-dak-surface">
         {imageSrc ? (
-          <Image src={imageSrc} alt="" fill className="object-cover" />
+          <UserImage src={imageSrc} />
         ) : (
           <Image src="/illustrations/auth-placeholder.svg" alt="" width={36} height={36} />
         )}

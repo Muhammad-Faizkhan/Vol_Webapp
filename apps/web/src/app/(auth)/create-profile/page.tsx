@@ -1,22 +1,35 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useRef, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { errorMessage, type Me } from "@vol/api-client";
+import { useAuth } from "@vol/api-client/react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { OnboardingGuard } from "@/components/auth/OnboardingGuard";
 import { Button } from "@/components/ui/Button";
+import { DropZone } from "@/components/ui/DropZone";
+import { TagInput } from "@/components/ui/TagInput";
+import { UserImage } from "@/components/ui/UserImage";
+import { api } from "@/lib/api";
+import { useUpload } from "@/lib/useUpload";
 
-const tags = ["Sustainability", "BIM"];
-
-function IndividualProfileForm({ persona }: { persona: string | null }) {
+function IndividualProfileForm() {
   const router = useRouter();
+  const { user, setUser } = useAuth();
+  const profile = user?.profile;
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatarUrl ?? null);
+  const [tags, setTags] = useState<string[]>(profile?.tags ?? []);
+  const { upload, uploading } = useUpload(setError);
+  const photoInput = useRef<HTMLInputElement>(null);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const fullName = String(data.get("fullName") ?? "").trim();
+    const interest = String(data.get("interest") ?? "");
 
     if (!fullName) {
       setError("Enter your name to continue.");
@@ -25,7 +38,21 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
 
     setError(null);
     setSubmitting(true);
-    router.push(persona ? `/network-visibility?persona=${persona}` : "/network-visibility");
+    try {
+      const updated = await api.put<Me>("/users/me/profile", {
+        fullName,
+        bio: String(data.get("bio") ?? "").trim(),
+        interests: interest ? [interest] : [],
+        tags,
+        avatarUrl,
+        portfolioUrl: String(data.get("portfolioUrl") ?? "").trim(),
+      });
+      setUser(updated);
+      router.push("/network-visibility");
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -54,19 +81,36 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
           className="flex w-full flex-col gap-[clamp(0.375rem,1.2dvh,1rem)] rounded-xl border border-[#712ae2] border-t-[3px] bg-white/70 px-6 py-[clamp(0.625rem,1.5dvh,1.75rem)] shadow-[0px_0px_10px_0px_rgba(148,54,251,0.5)] dark:border-dak-cta dark:bg-[#121212] sm:px-[41px]"
         >
           <div className="flex w-full flex-wrap items-center gap-3 border-b border-[rgba(148,54,251,0.6)] pb-[clamp(0.5rem,1.2dvh,1rem)] dark:border-dak-border">
-            <div className="flex size-[clamp(44px,5.5dvh,80px)] items-center justify-center rounded-xl border border-dashed border-[#9436fb] bg-[#020204] dark:border-dak-border dark:bg-transparent">
-              <Image src="/icons/user-rounded-small.svg" alt="" width={36} height={36} />
+            <div className="relative flex size-[clamp(44px,5.5dvh,80px)] items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#9436fb] bg-[#020204] dark:border-dak-border dark:bg-transparent">
+              {avatarUrl ? (
+                <UserImage src={avatarUrl} alt="Profile photo" />
+              ) : (
+                <Image src="/icons/user-rounded-small.svg" alt="" width={36} height={36} />
+              )}
             </div>
             <div className="flex flex-col items-start gap-1.5">
               <span className="text-base font-medium tracking-[0.28px] text-[#020204] dark:text-dak-heading">
                 Profile Photo
               </span>
+              <input
+                ref={photoInput}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const url = await upload(e.target.files?.[0]);
+                  if (url) setAvatarUrl(url);
+                  e.target.value = "";
+                }}
+              />
               <button
                 type="button"
-                className="flex h-10 items-center justify-center gap-2 rounded-lg border border-[#2b2b31] px-[17px] text-base font-medium tracking-[0.28px] text-[#2b2b31] dark:border-dak-border dark:text-dak-heading"
+                onClick={() => photoInput.current?.click()}
+                disabled={uploading}
+                className="flex h-10 items-center justify-center gap-2 rounded-lg border border-[#2b2b31] px-[17px] text-base font-medium tracking-[0.28px] text-[#2b2b31] disabled:opacity-60 dark:border-dak-border dark:text-dak-heading"
               >
                 <Image src="/icons/camera.svg" alt="" width={18} height={16} className="invert dark:invert-0" />
-                Upload Image
+                {uploading ? "Uploading…" : avatarUrl ? "Change Image" : "Upload Image"}
               </button>
             </div>
           </div>
@@ -78,6 +122,7 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
               <div className="relative flex h-full items-center px-6">
                 <input
                   name="fullName"
+                  defaultValue={profile?.fullName ?? ""}
                   placeholder="Enter your name"
                   className="w-full bg-transparent text-base text-[#2b2b31] placeholder:text-[rgba(43,43,49,0.6)] focus:outline-none dark:text-dak-heading dark:placeholder:text-dak-muted"
                 />
@@ -89,6 +134,7 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
             <label className="text-base font-medium text-[#020204] dark:text-dak-heading">Bio</label>
             <textarea
               name="bio"
+              defaultValue={profile?.bio ?? ""}
               rows={3}
               placeholder="Briefly describe your expertise and goals..."
               className="h-[clamp(40px,5.5dvh,80px)] w-full resize-none rounded-xl border border-[rgba(43,43,49,0.6)] bg-white/50 px-6 py-3 text-base text-[#2b2b31] placeholder:text-[rgba(43,43,49,0.6)] focus:outline-none dark:border-dak-border dark:bg-transparent dark:text-dak-heading dark:placeholder:text-dak-muted"
@@ -100,15 +146,15 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
             <div className="relative h-[clamp(44px,7dvh,56px)] w-full">
               <select
                 name="interest"
-                defaultValue=""
+                defaultValue={profile?.interests[0] ?? ""}
                 className="h-full w-full appearance-none rounded-xl border border-[rgba(43,43,49,0.6)] bg-white/50 px-6 text-base text-[rgba(43,43,49,0.6)] focus:outline-none dark:border-dak-border dark:bg-transparent dark:text-dak-heading"
               >
                 <option value="" disabled>
                   Select your main area of focus
                 </option>
-                <option value="architecture">Architecture</option>
-                <option value="engineering">Engineering</option>
-                <option value="construction">Construction</option>
+                <option value="Architecture">Architecture</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Construction">Construction</option>
               </select>
               <Image
                 src="/icons/dropdown-arrow.svg"
@@ -122,23 +168,7 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
 
           <div className="flex w-full flex-col items-start gap-1.5">
             <span className="text-base text-[#4f626e] dark:text-dak-heading">Category Tags</span>
-            <div className="flex flex-wrap items-start gap-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="flex h-8 items-center gap-1 rounded-xl border border-white bg-[#020204] px-[13px] text-xs font-semibold text-white dark:border-dak-cta dark:bg-transparent dark:text-dak-heading"
-                >
-                  {tag}
-                  <Image src="/icons/tag-close.svg" alt="" width={8} height={8} className="invert dark:invert-0" />
-                </span>
-              ))}
-              <button
-                type="button"
-                className="flex h-8 items-center rounded-xl border border-[#9436fb] bg-[rgba(148,54,251,0.2)] px-[13px] text-xs font-semibold text-[#9436fb] dark:border-dak-border dark:bg-transparent dark:text-dak-heading"
-              >
-                + Add Tag
-              </button>
-            </div>
+            <TagInput tags={tags} onChange={setTags} />
           </div>
 
           <div className="flex w-full flex-col gap-1.5 border-t border-[rgba(148,54,251,0.6)] pt-[clamp(0.5rem,1.2dvh,1rem)] dark:border-dak-border">
@@ -152,6 +182,7 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
               <input
                 type="url"
                 name="portfolioUrl"
+                defaultValue={profile?.portfolioUrl ?? ""}
                 placeholder="Portfolio URL (e.g., https://johndoe.com)"
                 className="h-14 min-w-0 flex-1 rounded-xl border border-[rgba(43,43,49,0.6)] bg-white/50 px-[13px] text-base text-[#2b2b31] placeholder:text-[rgba(43,43,49,0.6)] focus:outline-none dark:border-dak-border dark:bg-transparent dark:text-dak-heading dark:placeholder:text-dak-muted"
               />
@@ -178,12 +209,36 @@ function IndividualProfileForm({ persona }: { persona: string | null }) {
 const industrySegments = ["Architecture", "Engineering", "Construction", "Manufacturing"];
 const specialties = ["Structural", "Mechanical", "Electrical", "Civil", "Industrial Design"];
 
-function BusinessRegistrationForm({ persona }: { persona: string | null }) {
+function BusinessRegistrationForm() {
   const router = useRouter();
+  const { user, setUser, logout } = useAuth();
+  const business = user?.business;
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [coverUrl, setCoverUrl] = useState(business?.coverUrl ?? null);
+  const [logoUrl, setLogoUrl] = useState(business?.logoUrl ?? null);
+  const [docUrl, setDocUrl] = useState(business?.verificationDocUrl ?? null);
+  const [docName, setDocName] = useState<string | null>(null);
+  const [busy, setBusy] = useState<"cover" | "logo" | "doc" | null>(null);
+  const { upload } = useUpload(setError);
+  const coverInput = useRef<HTMLInputElement>(null);
+  const logoInput = useRef<HTMLInputElement>(null);
+  const docInput = useRef<HTMLInputElement>(null);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function pick(kind: "cover" | "logo" | "doc", file: File | undefined) {
+    setBusy(kind);
+    const url = await upload(file, kind === "doc" ? "document" : "image");
+    setBusy(null);
+    if (!url) return;
+    if (kind === "cover") setCoverUrl(url);
+    else if (kind === "logo") setLogoUrl(url);
+    else {
+      setDocUrl(url);
+      setDocName(file?.name ?? null);
+    }
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const businessName = String(data.get("businessName") ?? "").trim();
@@ -196,7 +251,23 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
 
     setError(null);
     setSubmitting(true);
-    router.push(persona ? `/network-visibility?persona=${persona}` : "/network-visibility");
+    try {
+      const updated = await api.put<Me>("/users/me/business", {
+        legalName: businessName,
+        contactEmail: email,
+        specialty: String(data.get("specialty") ?? ""),
+        industry: String(data.get("industry") ?? ""),
+        website: String(data.get("portfolioUrl") ?? "").trim(),
+        coverUrl,
+        logoUrl,
+        verificationDocUrl: docUrl,
+      });
+      setUser(updated);
+      router.push("/network-visibility?persona=business");
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -222,28 +293,40 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
           onSubmit={handleSubmit}
           className="flex w-full flex-col gap-[clamp(0.5rem,0.8dvh,0.75rem)] rounded-xl border border-[#712ae2] border-t-[3px] bg-white/70 px-6 py-[clamp(0.5rem,0.8dvh,1rem)] shadow-[0px_0px_10px_0px_rgba(148,54,251,0.5)] dark:border-dak-cta dark:bg-[#121212] sm:px-[41px]"
         >
-          <button
-            type="button"
-            className="flex min-h-[clamp(56px,5.5dvh,80px)] w-full flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#c6c6cd] bg-[#f5f5f5] py-3 dark:border-dak-border dark:bg-[#2b2b31]"
+          <input ref={coverInput} type="file" accept="image/*" className="hidden" onChange={(e) => { void pick("cover", e.target.files?.[0]); e.target.value = ""; }} />
+          <input ref={logoInput} type="file" accept="image/*" className="hidden" onChange={(e) => { void pick("logo", e.target.files?.[0]); e.target.value = ""; }} />
+          <input ref={docInput} type="file" accept="application/pdf,image/*" className="hidden" onChange={(e) => { void pick("doc", e.target.files?.[0]); e.target.value = ""; }} />
+
+          <DropZone
+            onFile={(file) => pick("cover", file)}
+            onClick={() => coverInput.current?.click()}
+            className="relative flex min-h-[clamp(56px,5.5dvh,80px)] w-full flex-col items-center justify-center gap-1.5 overflow-hidden rounded-xl border border-dashed border-[#c6c6cd] bg-[#f5f5f5] py-3 dark:border-dak-border dark:bg-[#2b2b31]"
           >
-            <Image src="/icons/upload-cloud.svg" alt="" width={24} height={30} className="invert dark:invert-0" />
-            <span className="text-sm text-[#2b2b31] dark:text-dak-body">or drag and drop</span>
-            <span className="text-xs font-semibold text-[#2b2b31] dark:text-dak-body">PDF, PNG, JPG up to 10MB</span>
-            <span className="flex h-[29px] items-center justify-center rounded-md bg-[#e4e4e7] px-4 text-sm font-bold text-[#020204] dark:bg-[#45464d] dark:text-dak-heading">
-              Upload cover image
+            {coverUrl && <UserImage src={coverUrl} alt="Cover image" className="opacity-40" />}
+            <Image src="/icons/upload-cloud.svg" alt="" width={24} height={30} className="relative invert dark:invert-0" />
+            <span className="relative text-sm text-[#2b2b31] dark:text-dak-body">or drag and drop</span>
+            <span className="relative text-xs font-semibold text-[#2b2b31] dark:text-dak-body">PDF, PNG, JPG up to 10MB</span>
+            <span className="relative flex h-[29px] items-center justify-center rounded-md bg-[#e4e4e7] px-4 text-sm font-bold text-[#020204] dark:bg-[#45464d] dark:text-dak-heading">
+              {busy === "cover" ? "Uploading…" : coverUrl ? "Change cover image" : "Upload cover image"}
             </span>
-          </button>
+          </DropZone>
 
           <div className="flex w-full flex-col items-center gap-3 border-b border-[rgba(148,54,251,0.6)] pb-[clamp(0.375rem,0.7dvh,0.625rem)] dark:border-dak-border">
-            <div className="flex size-[clamp(48px,4.5dvh,72px)] items-center justify-center rounded-xl border border-dashed border-[#9436fb] bg-[#020204] dark:border-dak-border dark:bg-transparent">
-              <Image src="/icons/user-rounded-small.svg" alt="" width={36} height={36} />
+            <div className="relative flex size-[clamp(48px,4.5dvh,72px)] items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#9436fb] bg-[#020204] dark:border-dak-border dark:bg-transparent">
+              {logoUrl ? (
+                <UserImage src={logoUrl} alt="Business logo" />
+              ) : (
+                <Image src="/icons/user-rounded-small.svg" alt="" width={36} height={36} />
+              )}
             </div>
             <button
               type="button"
-              className="flex h-10 items-center justify-center gap-2 rounded-lg border border-[#2b2b31] px-[17px] text-base font-medium tracking-[0.28px] text-[#2b2b31] dark:border-dak-border dark:text-dak-heading"
+              onClick={() => logoInput.current?.click()}
+              disabled={busy === "logo"}
+              className="flex h-10 items-center justify-center gap-2 rounded-lg border border-[#2b2b31] px-[17px] text-base font-medium tracking-[0.28px] text-[#2b2b31] disabled:opacity-60 dark:border-dak-border dark:text-dak-heading"
             >
               <Image src="/icons/camera.svg" alt="" width={18} height={16} className="invert dark:invert-0" />
-              Upload Image
+              {busy === "logo" ? "Uploading…" : logoUrl ? "Change Image" : "Upload Image"}
             </button>
           </div>
 
@@ -256,6 +339,7 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
               <div className="h-[clamp(44px,7dvh,56px)] w-full rounded-xl border border-[rgba(43,43,49,0.6)] dark:border-dak-border">
                 <input
                   name="businessName"
+                  defaultValue={business?.legalName ?? ""}
                   placeholder="Enter your company's legal name"
                   className="h-full w-full bg-transparent px-6 text-base text-[#2b2b31] placeholder:text-[rgba(43,43,49,0.6)] focus:outline-none dark:text-dak-heading dark:placeholder:text-dak-muted"
                 />
@@ -268,14 +352,14 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
                 <div className="relative h-[clamp(44px,7dvh,56px)] w-full">
                   <select
                     name="specialty"
-                    defaultValue=""
+                    defaultValue={business?.specialty ?? ""}
                     className="h-full w-full appearance-none rounded-xl border border-[rgba(43,43,49,0.6)] bg-white/50 px-6 text-base text-[rgba(43,43,49,0.6)] focus:outline-none dark:border-dak-border dark:bg-transparent dark:text-dak-heading"
                   >
                     <option value="" disabled>
                       Select your trade
                     </option>
                     {specialties.map((s) => (
-                      <option key={s} value={s.toLowerCase()}>{s}</option>
+                      <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
                   <Image
@@ -295,14 +379,14 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
                 <div className="relative h-[clamp(44px,7dvh,56px)] w-full">
                   <select
                     name="industry"
-                    defaultValue=""
+                    defaultValue={business?.industry ?? ""}
                     className="h-full w-full appearance-none rounded-xl border border-[rgba(43,43,49,0.6)] bg-white/50 px-6 text-base text-[rgba(43,43,49,0.6)] focus:outline-none dark:border-dak-border dark:bg-transparent dark:text-dak-heading"
                   >
                     <option value="" disabled>
                       Select Industry
                     </option>
                     {industrySegments.map((s) => (
-                      <option key={s} value={s.toLowerCase()}>{s}</option>
+                      <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
                   <Image
@@ -327,6 +411,7 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
                 <input
                   type="email"
                   name="email"
+                  defaultValue={business?.contactEmail ?? user?.email ?? ""}
                   placeholder="you@company.com"
                   className="h-full w-full bg-transparent px-6 text-base text-[#2b2b31] placeholder:text-[rgba(43,43,49,0.6)] focus:outline-none dark:text-dak-heading dark:placeholder:text-dak-muted"
                 />
@@ -348,6 +433,7 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
               <input
                 type="url"
                 name="portfolioUrl"
+                defaultValue={business?.website ?? ""}
                 placeholder="Portfolio URL (e.g., https://johndoe.com)"
                 className="h-14 min-w-0 flex-1 rounded-xl border border-[rgba(43,43,49,0.6)] bg-white/50 px-[13px] text-base text-[#2b2b31] placeholder:text-[rgba(43,43,49,0.6)] focus:outline-none dark:border-dak-border dark:bg-transparent dark:text-dak-heading dark:placeholder:text-dak-muted"
               />
@@ -360,19 +446,22 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
               To maintain network integrity, please provide a valid business license or relevant industry
               certification (ISO, AS9100, etc.).
             </p>
-            <button
-              type="button"
+            <DropZone
+              onFile={(file) => pick("doc", file)}
+              onClick={() => docInput.current?.click()}
               className="flex min-h-[clamp(48px,4.5dvh,64px)] w-full flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#c6c6cd] bg-[#f5f5f5] py-3 dark:border-dak-border dark:bg-[#2b2b31]"
             >
               <Image src="/icons/upload-cloud.svg" alt="" width={24} height={30} className="invert dark:invert-0" />
               <span className="flex items-center gap-1 text-sm text-[#2b2b31] dark:text-dak-body">
                 <span className="rounded-md bg-[#e4e4e7] px-3 py-1 font-bold text-[#020204] dark:bg-[#45464d] dark:text-dak-body">
-                  Upload a file
+                  {busy === "doc" ? "Uploading…" : docUrl ? "Replace file" : "Upload a file"}
                 </span>
                 or drag and drop
               </span>
-              <span className="text-xs font-semibold text-[#2b2b31] dark:text-dak-body">PDF, PNG, JPG up to 10MB</span>
-            </button>
+              <span className="text-xs font-semibold text-[#2b2b31] dark:text-dak-body">
+                {docUrl ? `✓ ${docName ?? "Document uploaded"}` : "PDF, PNG, JPG up to 10MB"}
+              </span>
+            </DropZone>
           </div>
 
           {error && <p className="w-full text-sm font-medium text-red-500 dark:text-red-400">{error}</p>}
@@ -380,7 +469,10 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
           <div className="flex w-full items-center justify-between gap-4 border-t border-[rgba(148,54,251,0.6)] pt-[clamp(0.75rem,2dvh,1.5625rem)] dark:border-dak-border">
             <button
               type="button"
-              onClick={() => router.push("/login")}
+              onClick={async () => {
+                await logout();
+                router.push("/login");
+              }}
               className="text-sm font-medium tracking-[0.28px] text-[#020204] dark:text-dak-heading"
             >
               Return to Login
@@ -402,19 +494,18 @@ function BusinessRegistrationForm({ persona }: { persona: string | null }) {
 
 function CreateProfileForm() {
   const searchParams = useSearchParams();
-  const persona = searchParams.get("persona");
-
-  if (persona === "business") {
-    return <BusinessRegistrationForm persona={persona} />;
-  }
-
-  return <IndividualProfileForm persona={persona} />;
+  const { user } = useAuth();
+  // The account type is the source of truth; ?persona= only matters before it's loaded.
+  const business = user ? user.accountType === "BUSINESS" : searchParams.get("persona") === "business";
+  return business ? <BusinessRegistrationForm /> : <IndividualProfileForm />;
 }
 
 export default function CreatePersonalProfilePage() {
   return (
     <Suspense fallback={null}>
-      <CreateProfileForm />
+      <OnboardingGuard>
+        <CreateProfileForm />
+      </OnboardingGuard>
     </Suspense>
   );
 }

@@ -16,7 +16,14 @@ export function piecewiseScale(ticks: number[]) {
 }
 
 export function formatK(v: number) {
-  return v >= 1000 ? `${v / 1000}k` : String(v);
+  return v >= 1000 ? `${Number((v / 1000).toFixed(1))}k` : String(v);
+}
+
+/** [0, M/10, M/5, M/2, M] where M is the next 1/2/5×10ⁿ at or above the peak (at least 10). */
+export function growthTicks(peak: number) {
+  let max = 10;
+  while (max < peak) max = String(max).startsWith("1") ? max * 2 : String(max).startsWith("2") ? (max / 2) * 5 : max * 2;
+  return [0, max / 10, max / 5, max / 2, max];
 }
 
 export const axisTick = { fill: "#c8cbd0", fontSize: 10, fontWeight: 500, letterSpacing: -0.3 };

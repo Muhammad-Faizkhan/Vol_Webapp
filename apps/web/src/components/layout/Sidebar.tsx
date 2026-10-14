@@ -2,41 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
-import { usePathname } from "next/navigation";
-
-const PERSONA_STORAGE_KEY = "vol-persona";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@vol/api-client/react";
 
 type SidebarProps = {
   open?: boolean;
   onClose?: () => void;
 };
 
-function subscribeToPersona(callback: () => void) {
-  window.addEventListener("storage", callback);
-  return () => window.removeEventListener("storage", callback);
-}
-
-function getPersonaSnapshot(): "individual" | "business" {
-  try {
-    return localStorage.getItem(PERSONA_STORAGE_KEY) === "business" ? "business" : "individual";
-  } catch {
-    return "individual";
-  }
-}
-
-function getPersonaServerSnapshot(): "individual" | "business" {
-  // The server has no access to localStorage, so it always renders "individual". Reading the
-  // real value only through useSyncExternalStore (rather than a useState lazy initializer or a
-  // plain useEffect) lets React reconcile the client's first render against this exact server
-  // snapshot, then swap to the live snapshot in a safe, non-hydration-mismatching update — the
-  // idiomatic fix for the Home link href mismatch reported in HANDOFF.md.
-  return "individual";
-}
-
 export function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const persona = useSyncExternalStore(subscribeToPersona, getPersonaSnapshot, getPersonaServerSnapshot);
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  // The shell only renders once the session is known (RequireAuth), so this never flips after hydration.
+  const persona = user?.accountType === "BUSINESS" ? "business" : "individual";
 
   const individualNavItems = [
     { href: "/home", label: "Home", icon: "home" },
@@ -126,14 +105,18 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
           </Link>
         </div>
 
-        <Link
-          href="/"
-          onClick={onClose}
-          className="mx-4 mb-[clamp(0.75rem,3dvh,1.5rem)] flex min-h-11 shrink-0 items-center gap-3 rounded-xl bg-black/20 px-4 py-[clamp(0.375rem,1.2dvh,0.75rem)] text-white dark:bg-white/10 lg:mx-5"
+        <button
+          type="button"
+          onClick={async () => {
+            onClose?.();
+            await logout();
+            router.push("/");
+          }}
+          className="mx-4 mb-[clamp(0.75rem,3dvh,1.5rem)] flex min-h-11 shrink-0 items-center gap-3 rounded-xl bg-black/20 px-4 py-[clamp(0.375rem,1.2dvh,0.75rem)] text-left text-white dark:bg-white/10 lg:mx-5"
         >
           <Image src="/icons/nav/logout.svg" alt="" width={24} height={24} />
           <span className="text-base font-medium tracking-[0.28px]">Logout</span>
-        </Link>
+        </button>
       </div>
     </>
   );

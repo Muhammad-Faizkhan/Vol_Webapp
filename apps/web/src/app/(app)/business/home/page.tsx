@@ -1,97 +1,65 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
-import { WorkspaceCard } from "@/components/cards/WorkspaceCard";
+import { timeAgo, type CanvasCard, type MyStats, type Notification, type Paged, type Product, type WorkspaceCard as WorkspaceCardData } from "@vol/api-client";
+import { useApiQuery, useAuth } from "@vol/api-client/react";
+import { CreateCanvasButton } from "@/components/canvas/CreateCanvasButton";
 import { ProductCard } from "@/components/cards/ProductCard";
+import { NotificationItem } from "@/components/notifications/NotificationItem";
+import { UserImage } from "@/components/ui/UserImage";
+import { CanvasGrid } from "@/components/workspace/CanvasGrid";
+import { greeting, plural, productSpecs } from "@/lib/format";
 
-const stats = [
-  { label: "ACTIVE WORKSPACES", value: "6", note: "+1 this week" },
-  { label: "TOTAL PRODUCTS", value: "24", note: "4 shared publicly" },
-  { label: "CANVASES", value: "24", note: "4 shared publicly" },
-  { label: "FOLLOWERS", value: "128", note: "+12 this month" },
-];
-
-const canvases = [
-  {
-    href: "/canvas/1",
-    title: "Lorem Ipsum Canvas",
-    meta: "Lorem Ipsum Workspace",
-    metaSecondary: "Edited 12min ago . 4 Products",
-    updatedTag: "+3 Collabs",
-    imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
-  },
-  {
-    href: "/canvas/2",
-    title: "Lorem Ipsum Canvas",
-    meta: "Lorem Ipsum Workspace",
-    metaSecondary: "Edited 12min ago . 4 Products",
-    updatedTag: "+3 Collabs",
-    imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
-  },
-  {
-    href: "/canvas/3",
-    title: "Lorem Ipsum Canvas",
-    meta: "Lorem Ipsum Workspace",
-    metaSecondary: "Edited 12min ago . 4 Products",
-    updatedTag: "+3 Collabs",
-    imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
-  },
-];
-
-const products = Array.from({ length: 3 }).map((_, i) => ({
-  href: `/business/products/${i + 1}/edit`,
-  brand: "Schluter Systems",
-  name: "Abc Product",
-  specs: [
-    ["Coverage", "54 sq ft / roll"],
-    ["True Size", "600 × 1200 MM"],
-  ] as [string, string][],
-  imageSrc: "/illustrations/canvas-thumb-mortar-pattern.jpg",
-}));
-
-const activeWorkspaces = [
-  { name: "Bathroom Project", meta: "4 members • Updated today" },
-  { name: "Training Materials", meta: "8 members • Updated yesterday" },
-];
+const emptyText = "text-sm text-[#45464d] dark:text-dak-muted";
 
 export default function BusinessHomePage() {
+  const { user } = useAuth();
+  const { data: stats } = useApiQuery<MyStats>("/users/me/stats");
+  const { data: canvases } = useApiQuery<Paged<CanvasCard>>("/canvases/recent?limit=3");
+  const { data: products } = useApiQuery<Paged<Product>>("/products/mine?limit=3");
+  const { data: workspaces } = useApiQuery<Paged<WorkspaceCardData>>("/workspaces?limit=4");
+  const { data: notes } = useApiQuery<Paged<Notification>>("/notifications?limit=2");
+
+  const statCards = [
+    { label: "ACTIVE WORKSPACES", value: stats?.workspaces.total, note: `+${stats?.workspaces.newThisWeek ?? 0} this week` },
+    { label: "TOTAL PRODUCTS", value: stats?.products.total, note: `${stats?.products.public ?? 0} shared publicly` },
+    { label: "CANVASES", value: stats?.canvases.total, note: `${stats?.canvases.public ?? 0} shared publicly` },
+    { label: "FOLLOWERS", value: stats?.followers.total, note: `+${stats?.followers.newThisMonth ?? 0} this month` },
+  ];
+  const business = user?.business;
+
   return (
     <div className="flex w-full flex-col gap-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold tracking-[-0.32px] text-auth-navy dark:text-dak-heading sm:text-[32px]">
-            Welcome back, Abc Business
+            {greeting()}, {user?.name}
           </h1>
           <p className="text-base text-auth-slate dark:text-dak-body">
-            MasterTile Inc. Here is your overview for today.
+            {business?.verification === "PENDING"
+              ? "Your business verification is under review. Here is your overview for today."
+              : "Here is your overview for today."}
           </p>
         </div>
         <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-start">
-          <Link
-            href="/canvas/1"
-            className="flex h-14 items-center justify-center gap-4 rounded-xl border border-app-dark-surface bg-app-dark-surface px-[17px] text-base text-white"
-          >
+          <CreateCanvasButton className="flex h-14 items-center justify-center gap-4 rounded-xl border border-app-dark-surface bg-app-dark-surface px-[17px] text-base text-white">
             Create Canvas
-          </Link>
-          <Link
-            href="/workspaces/create"
-            className="flex h-14 items-center justify-center gap-4 rounded-xl bg-dak-cta px-4 text-base text-white"
-          >
+          </CreateCanvasButton>
+          <Link href="/workspaces/create" className="flex h-14 items-center justify-center gap-4 rounded-xl bg-dak-cta px-4 text-base text-white">
             Create Workspace
           </Link>
         </div>
       </div>
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
-        {stats.map((stat) => (
+        {statCards.map((stat) => (
           <div
             key={stat.label}
             className="flex flex-col items-center gap-4 rounded-lg border border-light-border bg-[#f8f9ff] px-[25px] py-[17px] dark:border-dak-cta dark:bg-dak-surface"
           >
-            <span className="text-sm font-medium tracking-[0.28px] text-auth-navy dark:text-dak-heading">
-              {stat.label}
-            </span>
+            <span className="text-sm font-medium tracking-[0.28px] text-auth-navy dark:text-dak-heading">{stat.label}</span>
             <p className="text-2xl font-medium text-auth-navy dark:text-dak-heading">
-              {stat.value} <span className="text-sm text-[#889298] dark:text-dak-muted">{stat.note}</span>
+              {stat.value ?? "–"} <span className="text-sm text-[#889298] dark:text-dak-muted">{stats ? stat.note : ""}</span>
             </p>
           </div>
         ))}
@@ -102,15 +70,14 @@ export default function BusinessHomePage() {
           <section className="flex flex-col gap-4">
             <div className="flex items-end justify-between">
               <h3 className="text-2xl font-medium text-auth-navy dark:text-dak-heading">Recent Canvases</h3>
-              <Link href="/canvas/1" className="text-base font-medium text-dak-cta">
-                Open Last Canvas
-              </Link>
+              {canvases?.items[0] && (
+                <Link href={`/canvas/${canvases.items[0].id}`} className="text-base font-medium text-dak-cta">
+                  Open Last Canvas
+                </Link>
+              )}
             </div>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
-              {canvases.map((canvas, i) => (
-                <WorkspaceCard key={i} variant="grid" {...canvas} />
-              ))}
-            </div>
+            {canvases?.items.length === 0 && <p className={emptyText}>Canvases you create or edit show up here.</p>}
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">{canvases && <CanvasGrid canvases={canvases.items} />}</div>
           </section>
 
           <section className="flex flex-col gap-4">
@@ -120,9 +87,25 @@ export default function BusinessHomePage() {
                 Open Catalog
               </Link>
             </div>
+            {products?.items.length === 0 && (
+              <p className={emptyText}>
+                No products yet.{" "}
+                <Link href="/business/products/add" className="font-medium text-dak-cta">
+                  Add your first product
+                </Link>
+                .
+              </p>
+            )}
             <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6">
-              {products.map((p, i) => (
-                <ProductCard key={i} {...p} />
+              {products?.items.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  href={`/business/products/${p.id}/edit`}
+                  brand={p.brand ?? "—"}
+                  name={p.name}
+                  specs={productSpecs(p)}
+                  imageSrc={p.images[0]}
+                />
               ))}
             </div>
           </section>
@@ -131,65 +114,39 @@ export default function BusinessHomePage() {
         <div className="flex w-full flex-col gap-6 lg:sticky lg:top-[116px] lg:flex-1 lg:self-start">
           <div className="flex flex-col gap-4">
             <h3 className="text-2xl font-medium text-auth-navy dark:text-dak-heading">Notifications</h3>
-            <div className="flex items-start gap-4 rounded-lg border border-light-border bg-[#f8f9ff] p-[17px] dark:border-dak-border dark:bg-dak-surface">
-              <div className="relative size-10 shrink-0 overflow-hidden rounded-full">
-                <Image src="/avatars/avatar-1.jpg" alt="" fill className="object-cover" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium text-auth-navy dark:text-dak-heading">Abc Workspace Invitation</p>
-                <p className="text-sm text-auth-navy dark:text-dak-body">
-                  Mark Williams invited you as a collaborator
-                </p>
-                <div className="flex gap-2 pt-1">
-                  <button className="rounded-lg bg-auth-navy px-3 py-1.5 text-xs font-medium text-white dark:bg-dak-cta">
-                    Accept
-                  </button>
-                  <button className="rounded-lg border border-light-border px-3 py-1.5 text-xs font-medium text-auth-navy dark:border-dak-border dark:text-dak-heading">
-                    Decline
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 rounded-lg border border-light-border bg-[#f8f9ff] p-[17px] dark:border-dak-border dark:bg-dak-surface">
-              <div className="relative size-10 shrink-0 overflow-hidden rounded-lg">
-                <Image src="/illustrations/canvas-thumb-mortar-pattern.jpg" alt="" fill className="object-cover" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium text-auth-navy dark:text-dak-heading">Workspace Code Accepted</p>
-                <p className="text-sm text-auth-navy dark:text-dak-body">Mark Williams Accepted your request</p>
-                <button className="mt-1 w-fit rounded-lg bg-auth-navy px-3 py-1.5 text-xs font-medium text-white dark:bg-dak-cta">
-                  Open Classroom
-                </button>
-              </div>
-            </div>
+            {notes?.items.length === 0 && <p className={emptyText}>You&apos;re all caught up.</p>}
+            {notes?.items.map((n) => (
+              <NotificationItem key={n.id} n={n} />
+            ))}
           </div>
 
           <div className="flex flex-col gap-4">
             <h3 className="text-2xl font-medium text-auth-navy dark:text-dak-heading">Active Workspaces</h3>
             <div className="overflow-hidden rounded-lg border border-light-border dark:border-dak-border">
               <div className="bg-[#e7e8e9] px-6 py-3 text-sm font-medium tracking-[0.28px] text-auth-navy dark:bg-dak-bg dark:text-dak-heading">
-                Active Workspaces ({activeWorkspaces.length})
+                Active Workspaces ({workspaces?.total ?? 0})
               </div>
               <div className="flex flex-col bg-[#f8f9ff] dark:bg-dak-surface">
-                {activeWorkspaces.map((ws, i) => (
-                  <div
-                    key={ws.name}
+                {workspaces?.items.length === 0 && <p className={`p-4 ${emptyText}`}>No workspaces yet.</p>}
+                {workspaces?.items.map((ws, i) => (
+                  <Link
+                    key={ws.id}
+                    href={`/workspaces/${ws.id}`}
                     className={`flex items-center gap-3 p-4 ${i !== 0 ? "border-t border-light-border dark:border-dak-border" : ""}`}
                   >
-                    <div className="relative size-10 shrink-0 overflow-hidden rounded-lg">
-                      <Image src="/illustrations/canvas-thumb-mortar-pattern.jpg" alt="" fill className="object-cover" />
+                    <div className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-auth-navy dark:bg-dak-cta">
+                      <UserImage src={ws.imageUrl} fallback="/illustrations/canvas-thumb-mortar-pattern.jpg" />
                     </div>
-                    <div className="flex flex-1 flex-col">
-                      <span className="text-sm font-medium text-auth-navy dark:text-dak-heading">{ws.name}</span>
-                      <span className="text-xs text-[#929292] dark:text-dak-muted">{ws.meta}</span>
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-sm font-medium text-auth-navy dark:text-dak-heading">{ws.name}</span>
+                      <span className="text-xs text-[#929292] dark:text-dak-muted">
+                        {plural(ws.memberCount, "member")} • Updated {timeAgo(ws.lastActivityAt)}
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
-              <Link
-                href="/workspaces"
-                className="flex items-center justify-center bg-[#f2f2f3] py-3 text-sm font-medium text-auth-navy dark:bg-dak-bg dark:text-dak-heading"
-              >
+              <Link href="/workspaces" className="flex items-center justify-center bg-[#f2f2f3] py-3 text-sm font-medium text-auth-navy dark:bg-dak-bg dark:text-dak-heading">
                 View All Workspaces
               </Link>
             </div>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Geist } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider, THEME_INIT_SCRIPT } from "@/components/theme/ThemeProvider";
+import { Providers } from "@/components/Providers";
+import { THEME_INIT_SCRIPT } from "@/components/theme/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,7 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground dark:bg-dak-bg">
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

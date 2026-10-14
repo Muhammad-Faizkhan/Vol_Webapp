@@ -48,7 +48,7 @@ export default function JoinNetworkPage() {
             <RoleCard
               iconSrc="/icons/individual-dark.png"
               title="Individual User"
-              description="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+              description="Join workspaces, learn in classrooms and collaborate on shared canvases with engineers and instructors."
               buttonLabel="Login in as Individual profile"
               href="/login?persona=individual"
               accent="cta"
@@ -57,7 +57,7 @@ export default function JoinNetworkPage() {
               iconSrc="/icons/business-dark.png"
               iconClassName="object-cover"
               title="Business Profile"
-              description="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+              description="Publish your product catalog, run training classrooms and work with customers on shared canvases."
               buttonLabel="Login in as Business profile"
               href="/login?persona=business"
               accent="muted"

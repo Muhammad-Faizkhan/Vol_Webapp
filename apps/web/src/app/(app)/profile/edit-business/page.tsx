@@ -1,5 +1,5 @@
-import { ProfileOverview } from "@/components/profile/ProfileOverview";
+import { BusinessProfileEditForm } from "@/components/profile/ProfileEditForm";
 
 export default function EditProfileBusinessPage() {
-  return <ProfileOverview persona="business" />;
+  return <BusinessProfileEditForm />;
 }

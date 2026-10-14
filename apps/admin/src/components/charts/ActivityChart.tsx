@@ -19,6 +19,11 @@ export function ActivityChart({
   data: Array<{ label: string } & Record<string, number | string>>;
   height?: number;
 }) {
+  // Figma's axis is 0/300/500/700/1000; keep those proportions but scale to the busiest week.
+  const peak = Math.max(0, ...data.flatMap((d) => bars.map((b) => Number(d[b.key]) || 0)));
+  let max = 10;
+  while (max < peak) max = String(max).startsWith("1") ? max * 2 : String(max).startsWith("2") ? (max / 2) * 5 : max * 2;
+  const ticks = [0, 0.3, 0.5, 0.7, 1].map((f) => Math.round(f * max * 10) / 10);
   return (
     <div style={{ height }} className="w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%">
@@ -26,8 +31,9 @@ export function ActivityChart({
           <CartesianGrid stroke="#777a82" strokeWidth={0.5} vertical={false} />
           <XAxis dataKey="label" tick={axisTick} tickLine={false} axisLine={false} tickMargin={14} />
           <YAxis
-            domain={[0, 1000]}
-            ticks={[0, 300, 500, 700, 1000]}
+            domain={[0, max]}
+            ticks={ticks}
+            allowDecimals={false}
             tick={axisTick}
             tickLine={false}
             axisLine={false}

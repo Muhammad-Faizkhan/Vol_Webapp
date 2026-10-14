@@ -1,0 +1,14 @@
+{
+  "name": "@vol/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./react": "./src/react.tsx"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "swr": ">=2"
+  }
+}

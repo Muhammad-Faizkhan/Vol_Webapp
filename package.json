@@ -8,8 +8,10 @@
   "scripts": {
     "dev:web": "npm run dev -w web",
     "dev:admin": "npm run dev -w admin",
+    "dev:api": "npm run dev -w api",
     "build:web": "npm run build -w web",
     "build:admin": "npm run build -w admin",
+    "build:api": "npm run build -w api",
     "lint": "npm run lint --workspaces --if-present"
   }
 }

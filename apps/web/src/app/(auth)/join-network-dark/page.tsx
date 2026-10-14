@@ -64,8 +64,7 @@ export default function JoinNetworkDarkPage() {
                 Individual User
               </h3>
               <p className="text-base leading-[23px] text-dak-body">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry.
+                Join workspaces, learn in classrooms and collaborate on shared canvases with engineers and instructors.
               </p>
               <Link
                 href="/login?persona=individual"
@@ -88,8 +87,7 @@ export default function JoinNetworkDarkPage() {
                 Business Profile
               </h3>
               <p className="text-base leading-[23px] text-dak-body">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry.
+                Publish your product catalog, run training classrooms and work with customers on shared canvases.
               </p>
               <Link
                 href="/login?persona=business"

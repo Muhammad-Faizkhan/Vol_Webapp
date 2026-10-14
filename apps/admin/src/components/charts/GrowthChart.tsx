@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Area, ComposedChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ChartTooltip, axisTick, formatK, piecewiseScale } from "./chart-theme";
+import { ChartTooltip, axisTick, formatK, growthTicks, piecewiseScale } from "./chart-theme";
 
 export type GrowthSeries = {
   key: string;
@@ -15,13 +15,11 @@ export type GrowthSeries = {
   accent?: string;
 };
 
-const TICKS = [0, 10000, 20000, 50000, 100000];
-
 // Left-aligned y labels, as in Figma (they sit flush with the widget's padding, not the plot).
-function YTick({ y, payload }: { y?: number; payload?: { value: number } }) {
+function YTick({ y, payload, ticks }: { y?: number | string; payload?: { value: number }; ticks: number[] }) {
   return (
     <text x={1} y={y} dy={4} textAnchor="start" {...axisTick}>
-      {formatK(TICKS[payload?.value ?? 0])}
+      {formatK(ticks[payload?.value ?? 0])}
     </text>
   );
 }
@@ -41,7 +39,10 @@ export function GrowthChart({
   height?: number;
 }) {
   const [active, setActive] = useState(defaultIndex);
-  const scale = piecewiseScale(TICKS);
+  // Figma's ticks are 0/10k/20k/50k/100k; the same 1-2-5 spacing is scaled to the data's peak.
+  const peak = Math.max(0, ...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0)));
+  const ticks = growthTicks(peak);
+  const scale = piecewiseScale(ticks);
   const plotted = data.map((d, i) => {
     const row: Record<string, number | string | null> = { label: d.label };
     for (const s of series) {
@@ -86,7 +87,7 @@ export function GrowthChart({
             type="number"
             domain={scale.domain}
             ticks={scale.positions}
-            tick={<YTick />}
+            tick={(props: { y?: number | string; payload?: { value: number } }) => <YTick y={props.y} payload={props.payload} ticks={ticks} />}
             tickLine={false}
             axisLine={false}
             width={56}

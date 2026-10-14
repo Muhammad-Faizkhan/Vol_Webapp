@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { errorMessage } from "@vol/api-client";
+import { api } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const email = String(data.get("email") ?? "").trim();
@@ -24,9 +26,13 @@ export default function ForgotPasswordPage() {
 
     setError(null);
     setSubmitting(true);
-    router.push(
-      `/otp-verification?email=${encodeURIComponent(email)}&next=${encodeURIComponent("/reset-password")}`
-    );
+    try {
+      await api.post("/auth/forgot-password", { email });
+      router.push(`/otp-verification?${new URLSearchParams({ email, mode: "reset" })}`);
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
+    }
   }
 
   return (

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { Stat } from "@/lib/mock-data";
+import type { Stat } from "@/lib/admin";
 
 export function StatCard({ stat }: { stat: Stat }) {
   return (

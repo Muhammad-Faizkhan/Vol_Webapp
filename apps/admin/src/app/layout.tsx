@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist, Urbanist } from "next/font/google";
 import "./globals.css";
+import { Providers } from "@/components/Providers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -41,7 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: fitToFigmaScript }} />
       </head>
-      <body className="min-h-full bg-dak-bg text-dak-heading">{children}</body>
+      <body className="min-h-full bg-dak-bg text-dak-heading">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

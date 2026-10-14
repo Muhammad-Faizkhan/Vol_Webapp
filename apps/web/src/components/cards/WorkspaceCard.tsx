@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Avatar, UserImage } from "@/components/ui/UserImage";
 
 type WorkspaceCardProps = {
   href: string;
@@ -10,6 +11,8 @@ type WorkspaceCardProps = {
   updatedTag?: string;
   collaboratorInitials?: string[];
   collaboratorAvatars?: string[];
+  /** Real members (photo or initials); takes precedence over the static avatar list. */
+  collaborators?: { name: string; avatarUrl: string | null }[];
   collaboratorCount?: number;
   meta?: string;
   metaSecondary?: string;
@@ -26,6 +29,7 @@ export function WorkspaceCard({
   updatedTag,
   collaboratorInitials = [],
   collaboratorAvatars = [],
+  collaborators,
   collaboratorCount = 0,
   meta,
   metaSecondary,
@@ -41,7 +45,7 @@ export function WorkspaceCard({
     >
       <div className="relative flex h-[130px] items-end justify-end overflow-hidden bg-auth-navy p-4 dark:bg-dak-surface">
         {imageSrc ? (
-          <Image src={imageSrc} alt="" fill className="object-cover" />
+          <UserImage src={imageSrc} />
         ) : (
           <Image
             src="/illustrations/auth-placeholder.svg"
@@ -74,7 +78,13 @@ export function WorkspaceCard({
       {showFooter && (
         <div className="flex items-center gap-2 border-t border-[#c793ff] px-4 pb-[14px] pt-[13px] dark:border-dak-border">
           <div className="flex items-center">
-            {collaboratorAvatars.length > 0
+            {collaborators?.length
+              ? collaborators.slice(0, 3).map((c, i) => (
+                  <span key={i} style={{ marginLeft: i === 0 ? 0 : -8 }} className="rounded-full border-2 border-white dark:border-dak-surface">
+                    <Avatar src={c.avatarUrl} name={c.name} size={24} />
+                  </span>
+                ))
+              : collaboratorAvatars.length > 0
               ? collaboratorAvatars.map((avatar, i) => (
                   <span
                     key={i}

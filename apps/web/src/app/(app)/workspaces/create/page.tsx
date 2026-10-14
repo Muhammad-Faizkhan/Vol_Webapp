@@ -3,15 +3,57 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { errorMessage, type WorkspaceDetail } from "@vol/api-client";
+import { useInvalidate } from "@vol/api-client/react";
 import { Button } from "@/components/ui/Button";
+import { api } from "@/lib/api";
+import { useUpload } from "@/lib/useUpload";
 
 export default function CreateWorkspacePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const router = useRouter();
+  const invalidate = useInvalidate();
+  const { upload } = useUpload(setError);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const name = String(data.get("name") ?? "").trim();
+    if (!name) {
+      setError("Give your workspace a name.");
+      return;
+    }
+    setError(null);
+    setSubmitting(true);
+    try {
+      const imageUrl = photo ? await upload(photo) : null;
+      if (photo && !imageUrl) {
+        setSubmitting(false);
+        return;
+      }
+      const workspace = await api.post<WorkspaceDetail>("/workspaces", {
+        name,
+        description: String(data.get("description") ?? "").trim() || undefined,
+        industry: String(data.get("industry") ?? "") || undefined,
+        imageUrl,
+      });
+      await invalidate("/workspaces", "/users/me/stats");
+      router.push(`/workspaces/${workspace.id}/canvases`);
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
+    }
+  }
 
   const handleFile = (file: File | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
+    setPhoto(file);
     setPhotoPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return URL.createObjectURL(file);
@@ -24,6 +66,7 @@ export default function CreateWorkspacePage() {
       if (prev) URL.revokeObjectURL(prev);
       return null;
     });
+    setPhoto(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -112,7 +155,7 @@ export default function CreateWorkspacePage() {
         </p>
       </div>
 
-      <form className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-auth-navy dark:text-dak-heading">Workspace Name</label>
           <input
@@ -144,9 +187,9 @@ export default function CreateWorkspacePage() {
               <option value="" disabled>
                 Select an industry focus...
               </option>
-              <option value="architecture">Architecture</option>
-              <option value="engineering">Engineering</option>
-              <option value="construction">Construction</option>
+              <option value="Architecture">Architecture</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Construction">Construction</option>
             </select>
             <Image
               src="/icons/dropdown-arrow.svg"
@@ -158,8 +201,10 @@ export default function CreateWorkspacePage() {
           </div>
         </div>
 
-        <Button type="submit" variant="dark" className="rounded-2xl shadow-[0px_8px_6px_rgba(148,54,251,0.4)]">
-          Continue
+        {error && <p className="text-sm font-medium text-red-500 dark:text-red-400">{error}</p>}
+
+        <Button type="submit" variant="dark" disabled={submitting} className="rounded-2xl shadow-[0px_8px_6px_rgba(148,54,251,0.4)]">
+          {submitting ? "Creating…" : "Continue"}
         </Button>
       </form>
     </div>

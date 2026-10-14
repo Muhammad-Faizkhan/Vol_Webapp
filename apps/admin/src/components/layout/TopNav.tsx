@@ -1,10 +1,17 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { initials, type AdminCaseList } from "@vol/api-client";
+import { useApiQuery, useAuth } from "@vol/api-client/react";
 
 export function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
   const router = useRouter();
+  const { user } = useAuth();
+  // The bell shows how many reports are waiting for a moderator.
+  const { data: cases } = useApiQuery<AdminCaseList>("/admin/cases?limit=1", { refreshInterval: 60_000 });
+  const waiting = (cases?.stats.open ?? 0) + (cases?.stats.inReview ?? 0);
 
   return (
     <header className="fixed inset-x-0 top-0 z-20 flex h-20 items-center justify-between gap-3 bg-dak-bg px-4 sm:px-6 lg:left-[var(--adm-sidebar-w)] lg:h-[100px] lg:px-10">
@@ -42,11 +49,26 @@ export function TopNav({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-4">
-        <button type="button" aria-label="Notifications" className="flex h-6 items-center justify-center rounded-xl p-1">
+        <Link href="/cases" aria-label={waiting ? `${waiting} open cases` : "Cases"} className="relative flex h-6 items-center justify-center rounded-xl p-1">
           <Image src="/icons/bell.svg" alt="" width={16} height={20} />
-        </button>
-        <div className="relative size-[42px] overflow-hidden rounded-full">
-          <Image src="/avatars/admin.png" alt="Admin account" fill sizes="42px" className="object-cover" />
+          {waiting > 0 && (
+            <span className="absolute -right-2 -top-2 flex min-w-4 items-center justify-center rounded-full bg-dak-cta px-1 text-[10px] font-bold leading-4 text-white">
+              {waiting > 9 ? "9+" : waiting}
+            </span>
+          )}
+        </Link>
+        <div
+          className="relative flex size-[42px] items-center justify-center overflow-hidden rounded-full bg-dak-cta text-sm font-semibold text-white"
+          title={user ? `${user.name} · ${user.email}` : "Admin account"}
+        >
+          {user?.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
+          ) : user ? (
+            initials(user.name)
+          ) : (
+            <Image src="/avatars/admin.png" alt="Admin account" fill sizes="42px" className="object-cover" />
+          )}
         </div>
       </div>
     </header>

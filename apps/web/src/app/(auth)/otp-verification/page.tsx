@@ -3,38 +3,69 @@
 import Image from "next/image";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { errorMessage, type Session } from "@vol/api-client";
+import { useAuth } from "@vol/api-client/react";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { OtpInput } from "@/components/ui/OtpInput";
+import { api, homeFor, RESET_TOKEN_KEY, safeNext } from "@/lib/api";
+
+type Mode = "verify" | "login" | "reset";
+
+const SUBMIT_LABEL: Record<Mode, string> = { verify: "Verify Email", login: "Verify & Log In", reset: "Continue" };
 
 function OtpVerificationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "user@example.com";
-  const next = searchParams.get("next") || "/join-network";
+  const { setSession } = useAuth();
+  const email = searchParams.get("email") ?? "";
+  const rawMode = searchParams.get("mode");
+  const mode: Mode = rawMode === "login" || rawMode === "reset" ? rawMode : "verify";
+  const next = safeNext(searchParams.get("next"));
 
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (code.length < 6) {
       setError("Enter the full 6-digit code.");
       return;
     }
     setError(null);
-    router.push(next);
+    setSubmitting(true);
+    try {
+      if (mode === "reset") {
+        const { resetToken } = await api.post<{ resetToken: string }>("/auth/forgot-password/verify", { email, code });
+        // Kept out of the URL so it never lands in browser history.
+        sessionStorage.setItem(RESET_TOKEN_KEY, resetToken);
+        router.push("/reset-password");
+        return;
+      }
+      const session = await api.post<Session>(mode === "login" ? "/auth/login/verify" : "/auth/verify-email", { email, code });
+      setSession(session);
+      router.push(next ?? homeFor(session.user));
+    } catch (err) {
+      setError(errorMessage(err));
+      setSubmitting(false);
+    }
   }
 
-  // OTP verification is shared by the signup flow and the forgot-password flow —
-  // "Back" must retrace whichever one actually sent the user here, not always signup.
-  let backHref = "/signup";
-  if (next.startsWith("/reset-password")) {
-    backHref = "/forgot-password";
-  } else {
-    const nextPersona = new URLSearchParams(next.split("?")[1] ?? "").get("persona");
-    backHref = nextPersona ? `/signup?persona=${nextPersona}` : "/signup";
+  async function resend() {
+    setError(null);
+    try {
+      // A login code can only be re-sent by logging in again, which needs the password.
+      if (mode === "login") return router.push("/login");
+      await api.post(mode === "reset" ? "/auth/forgot-password" : "/auth/resend-verification", { email });
+      setResent(true);
+    } catch (err) {
+      setError(errorMessage(err));
+    }
   }
+
+  // Shared by signup, login (2FA) and forgot-password: "Back" retraces whichever flow led here.
+  const backHref = mode === "reset" ? "/forgot-password" : mode === "login" ? "/login" : "/signup";
 
   return (
     <AuthShell backHref={backHref}>
@@ -73,8 +104,8 @@ function OtpVerificationForm() {
             <OtpInput onChange={setCode} />
             {error && <p className="w-full text-center text-sm font-medium text-red-500 dark:text-red-400">{error}</p>}
             <div className="w-full pt-2">
-              <Button type="button" variant="dark" onClick={handleSubmit}>
-                Verify Email
+              <Button type="button" variant="dark" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "Verifying…" : SUBMIT_LABEL[mode]}
               </Button>
             </div>
           </div>
@@ -85,7 +116,7 @@ function OtpVerificationForm() {
             </p>
             <button
               type="button"
-              onClick={() => setResent(true)}
+              onClick={resend}
               className="flex items-center gap-1 text-sm font-medium tracking-[0.28px] text-[#020204] dark:text-dak-cta"
             >
               <Image src="/icons/refresh-small.svg" alt="" width={9} height={9} className="invert dark:invert-0" />
