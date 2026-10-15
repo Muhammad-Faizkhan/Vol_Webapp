@@ -25,6 +25,7 @@ const REFRESH_COOKIE: Record<SessionScope, string> = { app: "vol_rt", admin: "vo
 @Controller("auth")
 export class AuthController {
   private readonly secureCookies: boolean;
+  private readonly sameSite: "lax" | "none";
 
   constructor(
     private readonly auth: AuthService,
@@ -32,6 +33,9 @@ export class AuthController {
     config: ConfigService<Env, true>,
   ) {
     this.secureCookies = config.get("NODE_ENV", { infer: true }) === "production";
+    // In production the frontends (*.vercel.app) and API (*.up.railway.app) are different sites, so the
+    // refresh cookie must be SameSite=None to be sent at all. Same-site custom domains could go back to lax.
+    this.sameSite = this.secureCookies ? "none" : "lax";
   }
 
   // ─── User app ──────────────────────────────────────────────────────────────
@@ -180,7 +184,7 @@ export class AuthController {
     res.cookie(REFRESH_COOKIE[scope], refreshToken, {
       httpOnly: true,
       secure: this.secureCookies,
-      sameSite: "lax",
+      sameSite: this.sameSite,
       path: "/auth",
       maxAge: REFRESH_TTL_MS[scope],
     });
@@ -188,7 +192,7 @@ export class AuthController {
   }
 
   private clearCookie(res: Response, scope: SessionScope) {
-    res.clearCookie(REFRESH_COOKIE[scope], { httpOnly: true, secure: this.secureCookies, sameSite: "lax", path: "/auth" });
+    res.clearCookie(REFRESH_COOKIE[scope], { httpOnly: true, secure: this.secureCookies, sameSite: this.sameSite, path: "/auth" });
   }
 }
 

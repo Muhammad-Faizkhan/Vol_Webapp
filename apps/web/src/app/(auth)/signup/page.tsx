@@ -11,7 +11,7 @@ import { RedirectIfSignedIn } from "@/components/auth/RedirectIfSignedIn";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { TextField } from "@/components/ui/TextField";
-import { api, homeFor } from "@/lib/api";
+import { api, DEV_OTP_KEY, homeFor } from "@/lib/api";
 
 function SignUpForm() {
   const router = useRouter();
@@ -56,6 +56,7 @@ function SignUpForm() {
         router.push(next ?? homeFor(result.user));
         return;
       }
+      if (result.devCode) sessionStorage.setItem(DEV_OTP_KEY, JSON.stringify({ email, code: result.devCode }));
       const params = new URLSearchParams({ email, mode: "verify" });
       if (next) params.set("next", next);
       // Lets the OTP screen's "Back" return to this persona's signup instead of asking for the role again.

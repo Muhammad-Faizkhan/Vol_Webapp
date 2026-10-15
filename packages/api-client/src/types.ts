@@ -58,7 +58,8 @@ export type Me = UserSummary & {
 };
 
 export type Session = { accessToken: string; user: Me };
-export type SignupResult = Session | { email: string; verificationRequired: true };
+/** `devCode` is only sent while the API's temporary SHOW_SIGNUP_CODE switch is on (no email provider yet). */
+export type SignupResult = Session | { email: string; verificationRequired: true; devCode?: string };
 export type LoginResult = Session | { email: string; twoFactorRequired: true };
 
 export type PublicProfile = UserSummary & {

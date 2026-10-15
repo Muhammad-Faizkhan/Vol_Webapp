@@ -16,7 +16,15 @@ export type Env = {
   UPLOAD_DIR: string;
   /** e.g. smtps://user:pass@smtp.example.com:465. Unset: emails are logged instead of sent. */
   SMTP_URL?: string;
+  /** Brevo API key. When set, emails go through Brevo's HTTPS API instead of SMTP. */
+  BREVO_API_KEY?: string;
   MAIL_FROM: string;
+  /**
+   * TEMPORARY, while no email provider is set up: signup and resend-verification responses include
+   * the code so the app can show it on screen. Anyone can then verify any email, so turn it off once
+   * emails are delivered.
+   */
+  SHOW_SIGNUP_CODE: boolean;
 };
 
 export function validateEnv(raw: Record<string, unknown>): Env {
@@ -46,7 +54,9 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     WEB_URL: str("WEB_URL", "http://localhost:3000").replace(/\/$/, ""),
     UPLOAD_DIR: str("UPLOAD_DIR", "uploads"),
     SMTP_URL: str("SMTP_URL", "") || undefined,
+    BREVO_API_KEY: str("BREVO_API_KEY", "") || undefined,
     MAIL_FROM: str("MAIL_FROM", "VÔL <no-reply@vol.design>"),
+    SHOW_SIGNUP_CODE: str("SHOW_SIGNUP_CODE", "false") === "true",
   };
 
   if (missing.length > 0) {

@@ -1,6 +1,9 @@
 import { createApiClient, type Me } from "@vol/api-client";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// NEXT_PUBLIC_API_URL overrides; otherwise production builds use the live Railway API.
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === "production" ? "https://volwebapp-production.up.railway.app" : "http://localhost:4000");
 
 export const api = createApiClient({ baseUrl: API_URL, scope: "app" });
 
@@ -16,6 +19,12 @@ export function homeFor(user: Me) {
 
 /** sessionStorage key carrying the reset token from the OTP screen to the reset-password screen. */
 export const RESET_TOKEN_KEY = "vol-reset-token";
+
+/**
+ * sessionStorage key carrying `{ email, code }` from signup to the OTP screen, which shows the code.
+ * Temporary: only set while the API sends codes back (SHOW_SIGNUP_CODE), until emails are delivered.
+ */
+export const DEV_OTP_KEY = "vol-dev-otp";
 
 /** Only same-site relative paths are honoured as ?next= targets (no open redirects). */
 export function safeNext(next: string | null) {

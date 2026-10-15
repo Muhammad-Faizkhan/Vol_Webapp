@@ -7,7 +7,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { hash, verify } from "argon2";
+import type { Env } from "../config/env.js";
 import type { CodePurpose } from "../generated/prisma/enums.js";
 import { MailService } from "../mail/mail.service.js";
 import { NotificationsService } from "../notifications/notifications.service.js";
@@ -36,6 +38,7 @@ const MAIL_PURPOSE: Record<CodePurpose, "verify" | "reset" | "admin" | "login"> 
 export class AuthService {
   // Verified against when the email doesn't exist, so response time doesn't reveal registered emails.
   private dummyHash = hash("not-a-real-password");
+  private readonly showSignupCode: boolean;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -46,7 +49,10 @@ export class AuthService {
     private readonly settings: SettingsService,
     private readonly notifications: NotificationsService,
     private readonly workspaces: WorkspacesService,
-  ) {}
+    config: ConfigService<Env, true>,
+  ) {
+    this.showSignupCode = config.get("SHOW_SIGNUP_CODE", { infer: true });
+  }
 
   // ─── Sign up & email verification ──────────────────────────────────────────
 
@@ -76,14 +82,16 @@ export class AuthService {
       await this.workspaces.claimEmailInvites(user.id, email);
       return this.startSession(user.id, "app", meta);
     }
-    await this.sendCode(user.id, email, "EMAIL_VERIFICATION");
-    return { email, verificationRequired: true as const };
+    const code = await this.sendCode(user.id, email, "EMAIL_VERIFICATION");
+    return { email, verificationRequired: true as const, ...this.exposedCode(code) };
   }
 
   async resendVerification(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (user && !user.emailVerifiedAt && !user.deletedAt) {
-      await this.mail.sendCode(email, await this.codes.issue(user.id, "EMAIL_VERIFICATION"), "verify");
+      const code = await this.codes.issue(user.id, "EMAIL_VERIFICATION");
+      await this.mail.sendCode(email, code, "verify");
+      return { email, ...this.exposedCode(code) };
     }
     return { email };
   }
@@ -300,10 +308,20 @@ export class AuthService {
     });
   }
 
-  /** Emails a code. With `ignoreCooldown`, a code sent under a minute ago is kept (it's still valid). */
+  /** Only while SHOW_SIGNUP_CODE is on: the email verification code, for the app to show on screen. */
+  private exposedCode(code: string | undefined) {
+    return this.showSignupCode && code ? { devCode: code } : {};
+  }
+
+  /**
+   * Emails a code and returns it. With `ignoreCooldown`, a code sent under a minute ago is kept
+   * (it's still valid) and nothing is returned.
+   */
   private async sendCode(userId: string, email: string, purpose: CodePurpose, opts: { ignoreCooldown?: boolean } = {}) {
     try {
-      await this.mail.sendCode(email, await this.codes.issue(userId, purpose), MAIL_PURPOSE[purpose]);
+      const code = await this.codes.issue(userId, purpose);
+      await this.mail.sendCode(email, code, MAIL_PURPOSE[purpose]);
+      return code;
     } catch (error) {
       const coolingDown = error instanceof HttpException && error.getStatus() === HttpStatus.TOO_MANY_REQUESTS;
       if (!(coolingDown && opts.ignoreCooldown)) throw error;

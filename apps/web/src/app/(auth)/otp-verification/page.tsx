@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { errorMessage, type Session } from "@vol/api-client";
 import { useAuth } from "@vol/api-client/react";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/Button";
 import { OtpInput } from "@/components/ui/OtpInput";
-import { api, homeFor, RESET_TOKEN_KEY, safeNext } from "@/lib/api";
+import { api, DEV_OTP_KEY, homeFor, RESET_TOKEN_KEY, safeNext } from "@/lib/api";
 
 type Mode = "verify" | "login" | "reset";
 
@@ -27,6 +27,17 @@ function OtpVerificationForm() {
   const [error, setError] = useState<string | null>(null);
   const [resent, setResent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // Temporary, until emails are delivered: the code the API sent back, shown on screen.
+  const [devCode, setDevCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(DEV_OTP_KEY) ?? "null") as { email: string; code: string } | null;
+      if (mode === "verify" && saved?.email === email) setDevCode(saved.code);
+    } catch {
+      // Nothing saved, or storage unavailable: the user waits for the email as usual.
+    }
+  }, [email, mode]);
 
   async function handleSubmit() {
     if (code.length < 6) {
@@ -44,6 +55,7 @@ function OtpVerificationForm() {
         return;
       }
       const session = await api.post<Session>(mode === "login" ? "/auth/login/verify" : "/auth/verify-email", { email, code });
+      sessionStorage.removeItem(DEV_OTP_KEY);
       setSession(session);
       router.push(next ?? homeFor(session.user));
     } catch (err) {
@@ -57,7 +69,11 @@ function OtpVerificationForm() {
     try {
       // A login code can only be re-sent by logging in again, which needs the password.
       if (mode === "login") return router.push("/login");
-      await api.post(mode === "reset" ? "/auth/forgot-password" : "/auth/resend-verification", { email });
+      const result = await api.post<{ devCode?: string }>(mode === "reset" ? "/auth/forgot-password" : "/auth/resend-verification", { email });
+      if (result.devCode) {
+        sessionStorage.setItem(DEV_OTP_KEY, JSON.stringify({ email, code: result.devCode }));
+        setDevCode(result.devCode);
+      }
       setResent(true);
     } catch (err) {
       setError(errorMessage(err));
@@ -101,6 +117,13 @@ function OtpVerificationForm() {
               <span className="font-medium text-[#2b2b31] dark:text-dak-heading">{email}</span>.
             </p>
           </div>
+
+          {devCode && (
+            <p className="w-full rounded-lg border border-dashed border-dak-cta px-4 py-3 text-center text-sm text-[#2b2b31] dark:text-dak-body">
+              Email delivery isn&rsquo;t set up yet. Your code is{" "}
+              <span className="font-mono text-base font-semibold tracking-[0.2em] text-[#020204] dark:text-dak-heading">{devCode}</span>
+            </p>
+          )}
 
           <div className="flex w-full flex-col items-start gap-3">
             <OtpInput onChange={setCode} />
