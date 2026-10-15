@@ -145,7 +145,8 @@ export class AuthService {
 
   // Admin sign-in is passwordless: the admin enters their email and gets a one-time code.
   // The response never reveals whether the email belongs to an admin.
-  async adminLogin(email: string, meta: ClientMeta) {
+  async adminLogin(email: string, password: string | undefined, meta: ClientMeta) {
+    if (this.showSignupCode && password !== undefined) return this.adminLoginWithPassword(email, password, meta);
     await this.checkLockout(email);
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (user && !user.deletedAt && ADMIN_ROLES.has(user.role) && !accountBlockReason(user)) {
@@ -155,6 +156,25 @@ export class AuthService {
       await this.recordAttempt(email, user?.id, false, true, meta);
     }
     return { email };
+  }
+
+  /**
+   * Temporary, while SHOW_SIGNUP_CODE is on: the admin's password stands in for access to their inbox,
+   * so the sign-in code can be returned and shown on screen. Without a correct password nothing is shown.
+   */
+  private async adminLoginWithPassword(email: string, password: string, meta: ClientMeta) {
+    await this.checkLockout(email);
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    const eligible = !!user?.passwordHash && !user.deletedAt && ADMIN_ROLES.has(user.role) && !accountBlockReason(user);
+    const ok = eligible
+      ? await verify(user!.passwordHash!, password)
+      : await verify(await this.dummyHash, password).then(() => false);
+    if (!ok || !user) {
+      await this.recordAttempt(email, user?.id, false, true, meta);
+      throw new UnauthorizedException("Invalid email or password");
+    }
+    const code = await this.sendCode(user.id, email, "ADMIN_LOGIN");
+    return { email, ...this.exposedCode(code) };
   }
 
   async adminVerify({ email, code }: VerifyCodeDto, meta: ClientMeta) {
@@ -308,7 +328,7 @@ export class AuthService {
     });
   }
 
-  /** Only while SHOW_SIGNUP_CODE is on: the email verification code, for the app to show on screen. */
+  /** Only while SHOW_SIGNUP_CODE is on: the code, for the app to show on screen. */
   private exposedCode(code: string | undefined) {
     return this.showSignupCode && code ? { devCode: code } : {};
   }

@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { errorMessage, type Session } from "@vol/api-client";
 import { useAuth } from "@vol/api-client/react";
 import { CodeInput } from "@/components/auth/CodeInput";
-import { api } from "@/lib/api";
+import { api, DEV_OTP_KEY } from "@/lib/api";
 
 export function VerifyForm({ email, next }: { email: string; next: string }) {
   const router = useRouter();
@@ -15,6 +15,17 @@ export function VerifyForm({ email, next }: { email: string; next: string }) {
   const [resent, setResent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
+  // Temporary, until emails are delivered: the code the API sent back after the password check.
+  const [devCode, setDevCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(DEV_OTP_KEY) ?? "null") as { email: string; code: string } | null;
+      if (saved?.email === email) setDevCode(saved.code);
+    } catch {
+      // Nothing saved, or storage unavailable: the admin waits for the email as usual.
+    }
+  }, [email]);
 
   return (
     <form
@@ -25,6 +36,7 @@ export function VerifyForm({ email, next }: { email: string; next: string }) {
         setVerifying(true);
         try {
           setSession(await api.post<Session>("/auth/admin/verify", { email, code }));
+          sessionStorage.removeItem(DEV_OTP_KEY);
           router.push(next);
         } catch (err) {
           setError(errorMessage(err));
@@ -48,6 +60,12 @@ export function VerifyForm({ email, next }: { email: string; next: string }) {
       </div>
 
       <div className="flex flex-col gap-6">
+        {devCode && (
+          <p className="rounded-xl border border-dashed border-dak-cta px-4 py-3 text-center text-sm text-dak-body">
+            Email delivery isn&apos;t set up yet. Your code is{" "}
+            <span className="font-mono text-base font-semibold tracking-[0.2em] text-dak-heading">{devCode}</span>
+          </p>
+        )}
         <CodeInput value={code} onChange={setCode} />
         {error && <p className="text-center text-sm font-medium text-adm-danger">{error}</p>}
         <div className="pt-4">
@@ -67,6 +85,8 @@ export function VerifyForm({ email, next }: { email: string; next: string }) {
           type="button"
           onClick={async () => {
             setError(null);
+            // A code shown on screen needs the password again, so it can only be re-sent from the login page.
+            if (devCode) return router.push("/login");
             try {
               await api.post("/auth/admin/login", { email });
               setResent(true);

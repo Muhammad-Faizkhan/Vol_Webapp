@@ -8,6 +8,7 @@ import { Public } from "../common/decorators/public.decorator.js";
 import { UsersService } from "../users/users.service.js";
 import { AuthService } from "./auth.service.js";
 import {
+  AdminLoginDto,
   ChangePasswordDto,
   CredentialsDto,
   EmailDto,
@@ -126,8 +127,8 @@ export class AuthController {
   @Public()
   @HttpCode(200)
   @Post("admin/login")
-  adminLogin(@Body() { email }: EmailDto, @Req() req: Request) {
-    return this.auth.adminLogin(email, meta(req));
+  adminLogin(@Body() { email, password }: AdminLoginDto, @Req() req: Request) {
+    return this.auth.adminLogin(email, password, meta(req));
   }
 
   @Public()

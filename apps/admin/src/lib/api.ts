@@ -9,3 +9,9 @@ export const API_URL =
 // into the admin panel never affects a user-app session in the same browser.
 export const api = createApiClient({ baseUrl: API_URL, scope: "admin" });
 
+/**
+ * sessionStorage key carrying `{ email, code }` from the login screen to the verify screen, which shows
+ * the code. Temporary: only set while the API sends codes back (SHOW_SIGNUP_CODE), until emails are delivered.
+ */
+export const DEV_OTP_KEY = "vol-admin-dev-otp";
+

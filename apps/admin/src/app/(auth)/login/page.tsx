@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { errorMessage } from "@vol/api-client";
 import { useAuth } from "@vol/api-client/react";
 import { AuthHeading, AuthShell } from "@/components/auth/AuthShell";
-import { api } from "@/lib/api";
+import { api, DEV_OTP_KEY } from "@/lib/api";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const { status, user } = useAuth();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
@@ -33,7 +34,9 @@ export default function AdminLoginPage() {
           try {
             const address = email.trim();
             // The API answers the same way for every address, so it can't be used to find admin emails.
-            await api.post("/auth/admin/login", { email: address });
+            // Temporary: the password lets the API show the code on screen until emails are delivered.
+            const { devCode } = await api.post<{ devCode?: string }>("/auth/admin/login", { email: address, password });
+            if (devCode) sessionStorage.setItem(DEV_OTP_KEY, JSON.stringify({ email: address, code: devCode }));
             const next = new URLSearchParams(window.location.search).get("next");
             router.push(`/verify?${new URLSearchParams({ email: address, ...(next ? { next } : {}) })}`);
           } catch (err) {
@@ -53,6 +56,21 @@ export default function AdminLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="User@domain.com"
+              className="h-full min-w-0 flex-1 bg-transparent p-2.5 text-base text-dak-heading placeholder:text-dak-body focus:outline-none"
+            />
+          </span>
+        </label>
+
+        <label className="flex flex-col gap-4">
+          <span className="text-lg font-medium text-dak-heading">Password</span>
+          <span className="flex h-14 items-center rounded-xl border border-dak-heading pl-6 pr-4 focus-within:border-dak-cta">
+            <input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
               className="h-full min-w-0 flex-1 bg-transparent p-2.5 text-base text-dak-heading placeholder:text-dak-body focus:outline-none"
             />
           </span>

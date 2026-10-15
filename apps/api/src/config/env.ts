@@ -21,8 +21,8 @@ export type Env = {
   MAIL_FROM: string;
   /**
    * TEMPORARY, while no email provider is set up: signup and resend-verification responses include
-   * the code so the app can show it on screen. Anyone can then verify any email, so turn it off once
-   * emails are delivered.
+   * the code so the app can show it on screen, and so does admin login when the admin's password is
+   * given. Anyone can then verify any email, so turn it off once emails are delivered.
    */
   SHOW_SIGNUP_CODE: boolean;
 };

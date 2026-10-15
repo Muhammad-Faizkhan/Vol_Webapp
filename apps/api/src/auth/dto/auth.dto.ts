@@ -18,6 +18,14 @@ export class CredentialsDto extends EmailDto {
   password: string;
 }
 
+/** `password` is only used while the API shows codes on screen (SHOW_SIGNUP_CODE); see AuthService.adminLogin. */
+export class AdminLoginDto extends EmailDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  password?: string;
+}
+
 // The admin-configurable minimum (security.minPasswordLength) is checked in AuthService.
 export class SignupDto extends EmailDto {
   @IsString()
