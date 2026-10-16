@@ -12,18 +12,21 @@ async function main() {
   if (!email || !password || password.length < 8) {
     throw new Error("Set SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD (8+ characters) in .env");
   }
+  // Usernames are unique, so each extra admin needs its own SEED_ADMIN_USERNAME.
+  const username = process.env.SEED_ADMIN_USERNAME?.trim().toLowerCase() || "admin";
+  const fullName = process.env.SEED_ADMIN_NAME?.trim() || "VÔL Admin";
 
   const admin = await prisma.user.upsert({
     where: { email },
     update: { role: "ADMIN" },
     create: {
       email,
-      username: "admin",
+      username,
       passwordHash: await hash(password),
       role: "ADMIN",
       emailVerifiedAt: new Date(),
       onboardedAt: new Date(),
-      profile: { create: { fullName: "VÔL Admin", visibility: "PRIVATE" } },
+      profile: { create: { fullName, visibility: "PRIVATE" } },
     },
   });
   console.log(`Admin account: ${admin.email}`);
